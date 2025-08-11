@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  happy-plants:
+    build: .
+    container_name: happy-plants
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    restart: unless-stopped
