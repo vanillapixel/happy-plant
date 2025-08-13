@@ -58,6 +58,25 @@ header {
     gap: 12px;
     margin-bottom: 32px;
     flex-direction: column;
+    position: relative;
+}
+
+.header-auth-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    font-size: 1.2rem;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.header-auth-btn:hover {
+    color: var(--accent);
 }
 
 .logo {
@@ -177,7 +196,7 @@ button {
     transition: .25s ease-in-out;
 
     &:hover {
-        background: var(--accent__hover);
+        color: var(--accent__hover);
     }
 }
 
@@ -212,10 +231,6 @@ footer {
 
 body.modal-open {
     overflow: hidden;
-
-    .modal {
-        display: flex;
-    }
 }
 
 .modal {
@@ -225,7 +240,8 @@ body.modal-open {
     width: 100%;
     height: 100%;
     background: #0b1220f0;
-    display: none;
+    display: flex;
+    /* Vue v-if controls presence, so keep visible when in DOM */
     align-items: center;
     justify-content: center;
     z-index: 1000;
@@ -336,18 +352,28 @@ i.fas.fa-moon {
 }
 
 #chart-section {
-    &:has(canvas.no-data) {
-        display: none;
-    }
-
-    canvas {
+    .canvas-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
         width: min(800px, 100%) !important;
+        height: 100%;
+        box-shadow: var(--shadow);
+        background: var(--glass);
+        border-radius: 10px;
         padding: 20px;
         margin: auto;
         height: 400px;
-        border-radius: 10px;
-        box-shadow: var(--shadow);
-        background: var(--glass);
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+
+        &:empty {
+            display: none;
+        }
     }
 }
 
@@ -372,4 +398,32 @@ i.fas.fa-moon {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.hidden {
+    display: none;
+}
+
+.auth-container {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.auth-container .tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.auth-container .tab {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: inherit;
+}
+
+.auth-container .tab.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
 }

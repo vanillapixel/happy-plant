@@ -26,16 +26,21 @@
     <meta name="twitter:image" content="./assets/img/happy-plants-logo.png" />
     <link rel="canonical" href="https://ithinkitsfun.it/happy-plants" />
     <link rel="alternate" href="https://ithinkitsfun.it/happy-plants" hreflang="en" />
-    <script src="./src/main.js" defer></script>
+    <!-- Vue + App scripts -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script type="module" src="./src/vue-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
 
 </head>
 
-<body>
-    <div class="wrap">
+<body :class="{ 'modal-open': showAuthModal }">
+    <div id="app" class="wrap">
         <header>
+            <button class="header-auth-btn" :title="authTitle" @click="onAuthClick">
+                <i :class="authed ? 'fas fa-sign-out-alt' : 'fas fa-user'"></i>
+            </button>
             <div class="logo"><img src="./assets/img/happy-plants-logo.png" alt="Happy plants logo" /></div>
             <div>
                 <h1>Happy plants</h1>
@@ -44,13 +49,13 @@
         </header>
         <section id="instructions-section" class="card" id="tableCard">
             <table aria-label="Happy plants table">
-                <thead>
+                <thsead>
                     <tr>
                         <th>Plant</th>
                         <th>Ideal pH</th>
                         <th>Soil moisture (%)</th>
                     </tr>
-                </thead>
+                </thsead>
                 <tbody>
                     <tr>
                         <td><strong>Basil</strong><br><small>Ocimum basilicum</small></td>
@@ -96,25 +101,51 @@
                                         class="fas fa-moon"></i>85% </span></div>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            <strong>Thyme</strong>
+                            <br>
+                            <small>(Thymus vulgaris)</small>
+                        </td>
+                        <td>6.0–8.0</td>
+                        <td>
+                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>30% </span><span><i
+                                        class="fas fa-moon"></i>50% </span></div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
-            <div class="btns">
-                <button id="addReadingBtn">
-                    <i class="fas fa-plus"></i>
-                    Add reading
-                </button>
-            </div>
         </section>
+        <div class="btns">
+            <button id="addReadingBtn" :disabled="!authed" @click="openAddModal">
+                <i class="fas fa-plus"></i>
+                Add reading
+            </button>
+        </div>
+
         <section id="chart-section">
+
+            <!-- Dropdown for selecting plants -->
+            <div id="plant-selection">
+                <label for="plantDropdown">Select Plant:</label>
+                <select id="plantDropdown" v-model="selectedPlant" @change="onPlantChange">
+                    <option value="">--Choose a Plant--</option>
+                    <option v-for="p in plants" :key="p" :value="p">{{ p }}</option>
+                </select>
+            </div>
             <div class="filters-wrapper">
                 <label>
-                    <input type="radio" name="dataType" value="ph" checked> pH Level
+                    <input type="radio" name="dataType" value="ph" v-model="dataType" @change="onTypeChange"> pH Level
                 </label>
                 <label>
-                    <input type="radio" name="dataType" value="moisture"> Moisture Level
+                    <input type="radio" name="dataType" value="moisture" v-model="dataType" @change="onTypeChange">
+                    Moisture Level
                 </label>
             </div>
-            <canvas id="plants-chart" width="600" height="400"></canvas>
+            <div class="canvas-wrapper">
+                <div v-if="!chartData.length" class="no-data-message">No data available for the selected plant.</div>
+                <canvas id="plants-chart" width="600" height="400" v-else></canvas>
+            </div>
         </section>
         <section id="notes-section" class="notes-card">
             <p>Notes:</p>
@@ -144,15 +175,71 @@
                 <li><i class="fas fa-moon"></i>aim for the higher end of moisture targets</li>
             </ul>
         </section>
-    </div>
-    <div class="modal">
-        <button class="close-modal ghost">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="modal-content"></div>
-    </div>
+        <!-- Modals controlled by Vue -->
+        <div class="modal" v-if="showAuthModal">
+            <button class="close-modal ghost" @click="closeModals">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-content">
+                <div class="auth-container">
+                    <div class="tabs">
+                        <button class="tab" :class="{ active: authTab==='login' }"
+                            @click="authTab='login'">Login</button>
+                        <button class="tab" :class="{ active: authTab==='register' }"
+                            @click="authTab='register'">Register</button>
+                    </div>
+                    <div class="tab-content" v-show="authTab==='login'">
+                        <form @submit.prevent="login">
+                            <label>Email or Username
+                                <input type="text" v-model.trim="loginForm.identifier" required />
+                            </label>
+                            <label>Password
+                                <input type="password" v-model="loginForm.password" minlength="8" required />
+                            </label>
+                            <button type="submit">Sign in</button>
+                        </form>
+                    </div>
+                    <div class="tab-content" v-show="authTab==='register'">
+                        <form @submit.prevent="register">
+                            <label>Email
+                                <input type="email" v-model.trim="registerForm.email" required />
+                            </label>
+                            <label>Username
+                                <input type="text" v-model.trim="registerForm.username" required />
+                            </label>
+                            <label>Password
+                                <input type="password" v-model="registerForm.password" minlength="8" required />
+                            </label>
+                            <button type="submit">Create account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-
+        <div class="modal" v-if="showAddModal">
+            <button class="close-modal ghost" @click="closeModals">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-content">
+                <form class="add-reading-form" @submit.prevent="saveReading">
+                    <label for="plant">Select Plant:
+                        <select id="plant" v-model="addForm.plant" required>
+                            <option v-for="p in plants" :key="p" :value="p">{{ p }}</option>
+                        </select>
+                    </label>
+                    <label for="ph">pH Level:
+                        <input type="number" id="ph" step="0.1" min="0" max="14" v-model.number="addForm.ph" required>
+                    </label>
+                    <label for="moisture">Moisture Level (%):
+                        <input type="number" id="moisture" step="1" min="0" max="100" v-model.number="addForm.moisture"
+                            required>
+                    </label>
+                    <button type="submit">Save Reading</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
