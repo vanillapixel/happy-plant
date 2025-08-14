@@ -50,15 +50,15 @@
                 <img class="w-full h-full object-contain" src="./assets/img/happy-plants-logo.png"
                     alt="Happy plants logo" />
             </div>
+            <div>
+                <h1 class="text-2xl font-semibold">Happy plants</h1>
+                <p class="text-slate-600 dark:text-slate-300">pH & moisture targets for quick daily checks</p>
+            </div>
             <button class="ml-auto p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700" :title="authTitle"
                 @click="onAuthClick">
                 <i :class="authed ? 'fas fa-sign-out-alt' : 'fas fa-user'"
                     class="text-slate-700 dark:text-slate-200"></i>
             </button>
-            <div>
-                <h1 class="text-2xl font-semibold">Happy plants</h1>
-                <p class="text-slate-600 dark:text-slate-300">pH & moisture targets for quick daily checks</p>
-            </div>
         </header>
 
         <!-- Quick reference table -->
@@ -142,7 +142,7 @@
             <div class="grid gap-4 md:grid-cols-3 relative">
                 <div class="md:col-span-2">
                     <label for="species-name-input"
-                        class="block text-sm font-medium text-slate-700 mb-1">Species</label>
+                        class="block text-sm font-medium text-slate-400 mb-1">Species</label>
                     <div class="relative">
                         <input type="text" id="species-name-input" placeholder="e.g., Basil"
                             v-model.trim="newPlantForm.species_name"
@@ -162,7 +162,7 @@
                 </div>
                 <div class="md:col-span-1">
                     <label for="new-plant-label-input"
-                        class="block text-sm font-medium text-slate-700 mb-1">Label</label>
+                        class="block text-sm font-medium text-slate-400 mb-1">Label</label>
                     <input id="new-plant-label-input" type="text" placeholder="e.g., Basil by window"
                         v-model.trim="newPlantForm.label"
                         class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
@@ -182,7 +182,7 @@
             <!-- Select a user plant instance -->
             <div id="plant-selection" class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
                 <div class="w-full md:w-auto">
-                    <label for="plantDropdown" class="block text-sm font-medium text-slate-700 mb-1">Select
+                    <label for="plantDropdown" class="block text-sm font-medium text-slate-400 mb-1">Select
                         Plant</label>
                     <select id="plantDropdown" v-model="selectedUserPlantId" @change="onPlantChange"
                         class="w-full md:w-64 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2">
@@ -260,11 +260,11 @@
                     </div>
                     <div v-show="authTab==='login'">
                         <form @submit.prevent="login" class="space-y-3">
-                            <label class="block text-sm font-medium text-slate-700">Email or Username
+                            <label class="block text-sm font-medium text-slate-400">Email or Username
                                 <input type="text" v-model.trim="loginForm.identifier" required
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <label class="block text-sm font-medium text-slate-700">Password
+                            <label class="block text-sm font-medium text-slate-400">Password
                                 <input type="password" v-model="loginForm.password" minlength="8" required
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
@@ -275,15 +275,15 @@
                     </div>
                     <div v-show="authTab==='register'">
                         <form @submit.prevent="register" class="space-y-3">
-                            <label class="block text-sm font-medium text-slate-700">Email
+                            <label class="block text-sm font-medium text-slate-400">Email
                                 <input type="email" v-model.trim="registerForm.email" required
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <label class="block text-sm font-medium text-slate-700">Username
+                            <label class="block text-sm font-medium text-slate-400">Username
                                 <input type="text" v-model.trim="registerForm.username" required
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <label class="block text-sm font-medium text-slate-700">Password
+                            <label class="block text-sm font-medium text-slate-400">Password
                                 <input type="password" v-model="registerForm.password" minlength="8" required
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
