@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$dbFile = '../plants.sqlite';
+$dbFile = '../data/plants.sqlite';
 if (!file_exists($dbFile)) {
     echo json_encode([]);
     exit;

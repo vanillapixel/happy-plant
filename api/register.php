@@ -24,7 +24,7 @@ try {
         exit;
     }
 
-    $path = __DIR__ . '/../plants.sqlite';
+    $path = __DIR__ . '/../data/plants.sqlite';
     $pdo = new PDO("sqlite:$path");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->exec('CREATE TABLE IF NOT EXISTS users (

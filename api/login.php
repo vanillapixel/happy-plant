@@ -12,7 +12,7 @@ try {
     $identifier = trim($data['identifier']);
     $password = $data['password'];
 
-    $path = __DIR__ . '/../plants.sqlite';
+    $path = __DIR__ . '/../data/plants.sqlite';
     $pdo = new PDO("sqlite:$path");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

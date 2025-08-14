@@ -2,22 +2,27 @@ export function sortByDate(data) {
     return data.sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
-export function getThresholdLines(type) {
+export function getThresholdLines(type, thresholds) {
+    // thresholds can be null; fallback to generic values
     if (type === 'ph') {
+        const lo = thresholds?.ph_min ?? 6;
+        const hi = thresholds?.ph_max ?? 7;
         return [
-            { value: 6, color: 'red', label: '' },
-            { value: 7, color: 'green', label: '' }
+            { value: lo, color: 'red', label: '' },
+            { value: hi, color: 'green', label: '' }
         ];
     } else if (type === 'moisture') {
+        const day = thresholds?.moisture_morning ?? 60;
+        const night = thresholds?.moisture_night ?? 75;
         return [
-            { value: 60, color: '#ffd13b', label: '' },
-            { value: 75, color: '#9687eb', label: '' }
+            { value: day, color: '#ffd13b', label: '' },
+            { value: night, color: '#9687eb', label: '' }
         ];
     }
     return [];
 }
 
-export function drawChart(type = 'ph', data = []) {
+export function drawChart(type = 'ph', data = [], thresholds = null) {
     // Destroy any existing chart first
     if (window.plantsChartInstance) {
         try { window.plantsChartInstance.destroy(); } catch { }
@@ -38,14 +43,14 @@ export function drawChart(type = 'ph', data = []) {
     const sorted = sortByDate([...data]);
     const labels = sorted.map(item => (new Date(item.date)).toLocaleString());
     const values = sorted.map(item => (type === 'ph' ? item.ph : item.moisture));
-    const thresholds = getThresholdLines(type);
+    const thresholdsLines = getThresholdLines(type, thresholds);
 
     const thresholdLinesPlugin = {
         id: 'thresholdLines',
         afterDraw(chart) {
             const yScale = chart.scales['y'];
             const ctx = chart.ctx;
-            thresholds.forEach(({ value, color, label }) => {
+            thresholdsLines.forEach(({ value, color, label }) => {
                 const y = yScale.getPixelForValue(value);
                 ctx.save();
                 ctx.beginPath();

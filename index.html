@@ -5,7 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Happy plants — Quick Reference</title>
-    <link rel="stylesheet" href="./src/styles.css" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="./assets/img/happy-plants-logo.png" type="image/x-icon" />
     <meta name="description"
         content="Quick reference for ideal pH and moisture levels for common plants like basil, sage, cherry tomatoes, and cat grass. Includes moisture targets for daily checks." />
@@ -26,217 +27,307 @@
     <meta name="twitter:image" content="./assets/img/happy-plants-logo.png" />
     <link rel="canonical" href="https://ithinkitsfun.it/happy-plants" />
     <link rel="alternate" href="https://ithinkitsfun.it/happy-plants" hreflang="en" />
-    <!-- Vue + App scripts -->
+    <!-- Vue + Chart.js + App scripts (Chart.js must load before vue-app.js) -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="./src/vue-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+    <style>
+        /* Preserve scroll lock when Vue toggles 'modal-open' on body */
+        body.modal-open {
+            overflow: hidden;
+        }
+    </style>
 
 </head>
 
-<body :class="{ 'modal-open': showAuthModal }">
-    <div id="app" class="wrap">
-        <header>
-            <button class="header-auth-btn" :title="authTitle" @click="onAuthClick">
-                <i :class="authed ? 'fas fa-sign-out-alt' : 'fas fa-user'"></i>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100">
+    <div id="app" class="max-w-4xl mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="flex items-center gap-4 mb-6">
+            <div class="shrink-0 w-12 h-12">
+                <img class="w-full h-full object-contain" src="./assets/img/happy-plants-logo.png"
+                    alt="Happy plants logo" />
+            </div>
+            <button class="ml-auto p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700" :title="authTitle"
+                @click="onAuthClick">
+                <i :class="authed ? 'fas fa-sign-out-alt' : 'fas fa-user'"
+                    class="text-slate-700 dark:text-slate-200"></i>
             </button>
-            <div class="logo"><img src="./assets/img/happy-plants-logo.png" alt="Happy plants logo" /></div>
             <div>
-                <h1>Happy plants</h1>
-                <p class="lead">pH & moisture targets for quick daily checks</p>
+                <h1 class="text-2xl font-semibold">Happy plants</h1>
+                <p class="text-slate-600 dark:text-slate-300">pH & moisture targets for quick daily checks</p>
             </div>
         </header>
-        <section id="instructions-section" class="card" id="tableCard">
-            <table aria-label="Happy plants table">
-                <thsead>
+
+        <!-- Quick reference table -->
+        <section id="instructions-section"
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden mb-6">
+            <table class="w-full table-auto" aria-label="Happy plants table">
+                <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-200">
                     <tr>
-                        <th>Plant</th>
-                        <th>Ideal pH</th>
-                        <th>Soil moisture (%)</th>
+                        <th class="text-left px-4 py-3 font-medium">Plant</th>
+                        <th class="text-left px-4 py-3 font-medium">Ideal pH</th>
+                        <th class="text-left px-4 py-3 font-medium">Soil moisture (%)</th>
                     </tr>
-                </thsead>
-                <tbody>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
                     <tr>
-                        <td><strong>Basil</strong><br><small>Ocimum basilicum</small></td>
-                        <td div class="ph-targets">6.0-7.0</td>
-                        <td>
-                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>60% </span><span><i
-                                        class="fas fa-moon"></i>75% </span></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Sage</strong><br><small>Salvia officinalis</small></td>
-                        <td div class="ph-targets">6.0-7.0</td>
-                        <td>
-                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>40% </span><span><i
-                                        class="fas fa-moon"></i>55% </span></div>
+                        <td class="px-4 py-3"><strong>Basil</strong><br><small
+                                class="text-slate-500 dark:text-slate-400">Ocimum basilicum</small></td>
+                        <td class="px-4 py-3">6.0–7.0</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3 text-slate-700 dark:text-slate-200"><span><i
+                                        class="fas fa-sun text-yellow-500"></i> 60%</span><span><i
+                                        class="fas fa-moon"></i> 75%</span></div>
                         </td>
                     </tr>
                     <tr>
-                        <td><strong>Cherry tomatoes</strong><br><small>(varieties)</small></td>
-                        <td div class="ph-targets">6.0-6.5</td>
-                        <td>
-                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>60% </span><span><i
-                                        class="fas fa-moon"></i>80% </span></div>
+                        <td class="px-4 py-3"><strong>Sage</strong><br><small
+                                class="text-slate-500 dark:text-slate-400">Salvia officinalis</small></td>
+                        <td class="px-4 py-3">6.0–7.0</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3 text-slate-700 dark:text-slate-200"><span><i
+                                        class="fas fa-sun text-yellow-500"></i> 40%</span><span><i
+                                        class="fas fa-moon"></i> 55%</span></div>
                         </td>
                     </tr>
                     <tr>
-                        <td><strong>Cat grass</strong><br><small>(oat/barley/wheat grass)</small></td>
-                        <td div class="ph-targets">6.0-7.0</td>
-                        <td>
-                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>65% </span><span><i
-                                        class="fas fa-moon"></i>85% </span></div>
+                        <td class="px-4 py-3"><strong>Cherry tomatoes</strong><br><small
+                                class="text-slate-500 dark:text-slate-400">(varieties)</small></td>
+                        <td class="px-4 py-3">6.0–6.5</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3 text-slate-700 dark:text-slate-200"><span><i
+                                        class="fas fa-sun text-yellow-500"></i> 60%</span><span><i
+                                        class="fas fa-moon"></i> 80%</span></div>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            <strong>Mint</strong>
-                            <br>
-                            <small>(Mentha spp.)</small>
-                        </td>
-                        <td>6.0–7.0</td>
-                        <td>
-                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>70% </span><span><i
-                                        class="fas fa-moon"></i>85% </span></div>
+                        <td class="px-4 py-3"><strong>Cat grass</strong><br><small
+                                class="text-slate-500 dark:text-slate-400">(oat/barley/wheat grass)</small></td>
+                        <td class="px-4 py-3">6.0–7.0</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3 text-slate-700 dark:text-slate-200"><span><i
+                                        class="fas fa-sun text-yellow-500"></i> 65%</span><span><i
+                                        class="fas fa-moon"></i> 85%</span></div>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            <strong>Thyme</strong>
-                            <br>
-                            <small>(Thymus vulgaris)</small>
+                        <td class="px-4 py-3"><strong>Mint</strong><br><small
+                                class="text-slate-500 dark:text-slate-400">(Mentha spp.)</small></td>
+                        <td class="px-4 py-3">6.0–7.0</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3 text-slate-700 dark:text-slate-200"><span><i
+                                        class="fas fa-sun text-yellow-500"></i> 70%</span><span><i
+                                        class="fas fa-moon"></i> 85%</span></div>
                         </td>
-                        <td>6.0–8.0</td>
-                        <td>
-                            <div class="moisture-targets"><span><i class="fas fa-sun yellow"></i>30% </span><span><i
-                                        class="fas fa-moon"></i>50% </span></div>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3"><strong>Thyme</strong><br><small
+                                class="text-slate-500 dark:text-slate-400">(Thymus vulgaris)</small></td>
+                        <td class="px-4 py-3">6.0–8.0</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3 text-slate-700 dark:text-slate-200"><span><i
+                                        class="fas fa-sun text-yellow-500"></i> 30%</span><span><i
+                                        class="fas fa-moon"></i> 50%</span></div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </section>
-        <div class="btns">
-            <button id="addReadingBtn" :disabled="!authed" @click="openAddModal">
-                <i class="fas fa-plus"></i>
-                Add reading
-            </button>
+
+        <!-- Quick add a new plant instance -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4 mb-6">
+            <div class="grid gap-4 md:grid-cols-3 relative">
+                <div class="md:col-span-2">
+                    <label for="species-name-input"
+                        class="block text-sm font-medium text-slate-700 mb-1">Species</label>
+                    <div class="relative">
+                        <input type="text" id="species-name-input" placeholder="e.g., Basil"
+                            v-model.trim="newPlantForm.species_name"
+                            class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
+                        <div class="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow z-10 max-h-56 overflow-auto"
+                            v-if="newPlantForm.species_name && newPlantForm.species_name.length >= 2 && speciesSuggestions.length">
+                            <div class="px-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60"
+                                v-for="s in speciesSuggestions" :key="s.id"
+                                @click="newPlantForm.species_name = s.common_name; speciesSuggestions = []">
+                                <div class="font-medium">{{ s.common_name }}</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400" v-if="s.scientific_name">{{
+                                    s.scientific_name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-red-500 dark:text-red-400 mt-1" v-if="speciesError">{{ speciesError }}</p>
+                </div>
+                <div class="md:col-span-1">
+                    <label for="new-plant-label-input"
+                        class="block text-sm font-medium text-slate-700 mb-1">Label</label>
+                    <input id="new-plant-label-input" type="text" placeholder="e.g., Basil by window"
+                        v-model.trim="newPlantForm.label"
+                        class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
+                </div>
+            </div>
+            <div class="mt-4">
+                <button @click="addUserPlant"
+                    class="inline-flex items-center gap-2 rounded-md bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">
+                    <i class="fas fa-plus"></i>
+                    Add
+                </button>
+            </div>
         </div>
 
-        <section id="chart-section">
+        <section id="chart-section" class="mb-6">
 
-            <!-- Dropdown for selecting plants -->
-            <div id="plant-selection">
-                <label for="plantDropdown">Select Plant:</label>
-                <select id="plantDropdown" v-model="selectedPlant" @change="onPlantChange">
-                    <option value="">--Choose a Plant--</option>
-                    <option v-for="p in plants" :key="p" :value="p">{{ p }}</option>
-                </select>
+            <!-- Select a user plant instance -->
+            <div id="plant-selection" class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
+                <div class="w-full md:w-auto">
+                    <label for="plantDropdown" class="block text-sm font-medium text-slate-700 mb-1">Select
+                        Plant</label>
+                    <select id="plantDropdown" v-model="selectedUserPlantId" @change="onPlantChange"
+                        class="w-full md:w-64 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2">
+                        <option value="">--Choose a Plant--</option>
+                        <option v-for="p in userPlants" :key="p.id" :value="String(p.id)">{{ p.label }} ({{ p.species
+                            }})</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="addReadingBtn" :disabled="!authed" @click="openAddModal"
+                        class="inline-flex items-center gap-2 rounded-md bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-plus"></i>
+                        Add reading
+                    </button>
+                </div>
             </div>
-            <div class="filters-wrapper">
-                <label>
-                    <input type="radio" name="dataType" value="ph" v-model="dataType" @change="onTypeChange"> pH Level
+
+
+            <div class="flex items-center gap-6 mb-4 text-sm text-slate-700 dark:text-slate-200">
+                <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="ph"
+                        v-model="dataType" @change="onTypeChange">
+                    pH Level
                 </label>
-                <label>
-                    <input type="radio" name="dataType" value="moisture" v-model="dataType" @change="onTypeChange">
+                <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="moisture"
+                        v-model="dataType" @change="onTypeChange">
                     Moisture Level
                 </label>
             </div>
-            <div class="canvas-wrapper">
-                <div v-if="!chartData.length" class="no-data-message">No data available for the selected plant.</div>
-                <canvas id="plants-chart" width="600" height="400" v-else></canvas>
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4">
+                <div v-if="!chartData.length" class="text-slate-500 dark:text-slate-400 text-center py-12">No data
+                    available for the selected plant.</div>
+                <canvas id="plants-chart" width="600" height="400" v-else class="w-full"></canvas>
             </div>
         </section>
-        <section id="notes-section" class="notes-card">
-            <p>Notes:</p>
-            <ul class="notes">
-                <li>
-                    <i class="fas fa-leaf green"></i>Basil and cherry tomatoes like steady moisture but not waterlogged
-                    soil
-                </li>
-                <li>
-                    <i class="fas fa-seedling green"></i>Sage prefers drier conditions,
-                    so let the soil dry out a bit between waterings
-                </li>
-                <li>
-                    <img class="icon" src="./assets/img/icons/grass-icon.svg" alt="">Cat grass likes consistently moist
-                    soil,
-                    especially when young
-                </li>
-                <li>
-                    <img class="icon" src="./assets/img/icons/tomato-icon.svg">Cherry tomatoes can tolerate a
-                    bit
-                    more moisture, especially in warmer weather
-                </li>
+        <section id="notes-section"
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4">
+            <p class="font-medium mb-2">Notes:</p>
+            <ul class="space-y-2 mb-4">
+                <li class="text-slate-700 dark:text-slate-200"><i class="fas fa-leaf text-emerald-600"></i> Basil and
+                    cherry tomatoes like steady moisture but not waterlogged soil</li>
+                <li class="text-slate-700 dark:text-slate-200"><i class="fas fa-seedling text-emerald-600"></i> Sage
+                    prefers drier conditions, so let the soil dry out a bit between waterings</li>
+                <li class="text-slate-700 dark:text-slate-200"><img class="inline w-4 h-4 align-text-bottom"
+                        src="./assets/img/icons/grass-icon.svg" alt=""> Cat grass likes consistently moist soil,
+                    especially when young</li>
+                <li class="text-slate-700 dark:text-slate-200"><img class="inline w-4 h-4 align-text-bottom"
+                        src="./assets/img/icons/tomato-icon.svg" alt=""> Cherry tomatoes can tolerate a bit more
+                    moisture, especially in warmer weather</li>
             </ul>
-            <ul class="notes">
+            <ul class="space-y-2 text-slate-700 dark:text-slate-200">
                 <li>Adjust pH with organic amendments lime (to raise) or sulfur/vinegar (to lower)</li>
-                <li><i class="fas fa-sun yellow"></i>aim for the lower end of moisture targets</li>
-                <li><i class="fas fa-moon"></i>aim for the higher end of moisture targets</li>
+                <li><i class="fas fa-sun text-yellow-500"></i> aim for the lower end of moisture targets</li>
+                <li><i class="fas fa-moon"></i> aim for the higher end of moisture targets</li>
             </ul>
         </section>
         <!-- Modals controlled by Vue -->
-        <div class="modal" v-if="showAuthModal">
-            <button class="close-modal ghost" @click="closeModals">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-content">
-                <div class="auth-container">
-                    <div class="tabs">
-                        <button class="tab" :class="{ active: authTab==='login' }"
+        <!-- Auth Modal -->
+        <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showAuthModal">
+            <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-xl shadow-xl">
+                <button
+                    class="absolute top-3 right-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    @click="closeModals">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="p-6">
+                    <div class="flex gap-2 mb-4">
+                        <button class="px-3 py-2 rounded-md text-sm font-medium dark:bg-slate-700 dark:text-slate-200"
+                            :class="authTab==='login' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'"
                             @click="authTab='login'">Login</button>
-                        <button class="tab" :class="{ active: authTab==='register' }"
+                        <button class="px-3 py-2 rounded-md text-sm font-medium dark:bg-slate-700 dark:text-slate-200"
+                            :class="authTab==='register' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'"
                             @click="authTab='register'">Register</button>
                     </div>
-                    <div class="tab-content" v-show="authTab==='login'">
-                        <form @submit.prevent="login">
-                            <label>Email or Username
-                                <input type="text" v-model.trim="loginForm.identifier" required />
+                    <div v-show="authTab==='login'">
+                        <form @submit.prevent="login" class="space-y-3">
+                            <label class="block text-sm font-medium text-slate-700">Email or Username
+                                <input type="text" v-model.trim="loginForm.identifier" required
+                                    class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <label>Password
-                                <input type="password" v-model="loginForm.password" minlength="8" required />
+                            <label class="block text-sm font-medium text-slate-700">Password
+                                <input type="password" v-model="loginForm.password" minlength="8" required
+                                    class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <button type="submit">Sign in</button>
+                            <button type="submit"
+                                class="w-full rounded-md bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">Sign
+                                in</button>
                         </form>
                     </div>
-                    <div class="tab-content" v-show="authTab==='register'">
-                        <form @submit.prevent="register">
-                            <label>Email
-                                <input type="email" v-model.trim="registerForm.email" required />
+                    <div v-show="authTab==='register'">
+                        <form @submit.prevent="register" class="space-y-3">
+                            <label class="block text-sm font-medium text-slate-700">Email
+                                <input type="email" v-model.trim="registerForm.email" required
+                                    class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <label>Username
-                                <input type="text" v-model.trim="registerForm.username" required />
+                            <label class="block text-sm font-medium text-slate-700">Username
+                                <input type="text" v-model.trim="registerForm.username" required
+                                    class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <label>Password
-                                <input type="password" v-model="registerForm.password" minlength="8" required />
+                            <label class="block text-sm font-medium text-slate-700">Password
+                                <input type="password" v-model="registerForm.password" minlength="8" required
+                                    class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
                             </label>
-                            <button type="submit">Create account</button>
+                            <button type="submit"
+                                class="w-full rounded-md bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">Create
+                                account</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="modal" v-if="showAddModal">
-            <button class="close-modal ghost" @click="closeModals">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-content">
-                <form class="add-reading-form" @submit.prevent="saveReading">
-                    <label for="plant">Select Plant:
-                        <select id="plant" v-model="addForm.plant" required>
-                            <option v-for="p in plants" :key="p" :value="p">{{ p }}</option>
-                        </select>
-                    </label>
-                    <label for="ph">pH Level:
-                        <input type="number" id="ph" step="0.1" min="0" max="14" v-model.number="addForm.ph" required>
-                    </label>
-                    <label for="moisture">Moisture Level (%):
-                        <input type="number" id="moisture" step="1" min="0" max="100" v-model.number="addForm.moisture"
-                            required>
-                    </label>
-                    <button type="submit">Save Reading</button>
-                </form>
+        <!-- Add Reading Modal -->
+        <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showAddModal">
+            <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-xl shadow-xl">
+                <button
+                    class="absolute top-3 right-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    @click="closeModals">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="p-6">
+                    <form class="space-y-3" @submit.prevent="saveReading">
+                        <label for="plant" class="block text-sm font-medium text-slate-700">Select Plant
+                            <select id="plant" v-model="addForm.user_plant_id" required
+                                class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2">
+                                <option v-for="p in userPlants" :key="p.id" :value="String(p.id)">{{ p.label }} ({{
+                                    p.species }})</option>
+                            </select>
+                        </label>
+                        <label for="ph" class="block text-sm font-medium text-slate-700">pH Level
+                            <input type="number" id="ph" step="0.1" min="0" max="14" v-model.number="addForm.ph"
+                                required
+                                class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2">
+                        </label>
+                        <label for="moisture" class="block text-sm font-medium text-slate-700">Moisture Level (%)
+                            <input type="number" id="moisture" step="1" min="0" max="100"
+                                v-model.number="addForm.moisture" required
+                                class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2">
+                        </label>
+                        <button type="submit"
+                            class="w-full rounded-md bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700">Save
+                            Reading</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

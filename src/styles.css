@@ -6,6 +6,10 @@
     --accent__hover: #0b9265;
     --glass: rgba(255, 255, 255, 0.6);
     --shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+    --hp-primary: #47b8db;
+    --hp-border: #e2e8f0;
+    --hp-text: #334155;
+    --hp-soft-bg: #f7fbfd;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,6 +31,7 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    position: relative;
 }
 
 body {
@@ -130,10 +135,12 @@ thead th {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06)
 }
 
-tbody td {
+tbody td,
+tbody th {
     padding: 10px 8px;
     font-size: 15px;
-    vertical-align: top
+    vertical-align: top;
+    text-align: left;
 }
 
 tbody tr+tr td {
@@ -426,4 +433,161 @@ i.fas.fa-moon {
     background: var(--accent);
     color: white;
     border-color: var(--accent);
+}
+
+/* --- Improved form styling for Select Plant and Add Plant --- */
+#plant-selection,
+.new-plant-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--hp-border);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin: 12px 0;
+}
+
+#plant-selection label,
+.new-plant-form label {
+    font-weight: 600;
+    color: var(--hp-text);
+    margin-right: 4px;
+}
+
+/* Controls inside the two forms */
+select,
+input[type="text"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 1px solid var(--hp-border);
+    border-radius: 8px;
+    background-color: #fff;
+    color: #1f2937;
+    padding: 10px 40px 10px 12px;
+    font-size: 14px;
+    line-height: 1.2;
+    min-width: 220px;
+}
+
+#plant-selection select:focus,
+.new-plant-form select:focus,
+.new-plant-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--hp-primary);
+    box-shadow: 0 0 0 3px rgba(71, 184, 219, 0.2);
+}
+
+/* Override global select background arrow for these forms */
+#plant-selection select,
+.new-plant-form select {
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2347b8db"%3E%3Cpath d="M7 10l5 5 5-5z"/%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+/* Primary button style */
+.new-plant-form button {
+    background-color: var(--hp-primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.02s ease;
+}
+
+.new-plant-form button:hover {
+    filter: brightness(1.05);
+}
+
+.new-plant-form button:active {
+    transform: translateY(1px);
+}
+
+/* Species autocomplete combo */
+.new-plant-form .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.new-plant-form .input-wrapper .or {
+    display: none;
+}
+
+.new-plant-form input[list] {
+    border: 1px solid var(--hp-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    min-width: 220px;
+}
+
+.new-plant-form input[list]:focus {
+    outline: none;
+    border-color: var(--hp-primary);
+    box-shadow: 0 0 0 3px rgba(71, 184, 219, 0.2);
+}
+
+/* Autocomplete dropdown for species */
+.new-plant-form .autocomplete {
+    position: relative;
+}
+
+.new-plant-form .autocomplete .suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid var(--hp-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    margin-top: 6px;
+    color: var(--hp-primary);
+}
+
+.new-plant-form .autocomplete .suggestions .item {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.new-plant-form .autocomplete .suggestions .item:hover {
+    background: var(--hp-soft-bg);
+}
+
+.new-plant-form .autocomplete .error {
+    margin-top: 6px;
+    color: #dc2626;
+    font-size: 12px;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 640px) {
+
+    #plant-selection,
+    .new-plant-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #plant-selection select,
+    .new-plant-form select,
+    .new-plant-form input[type="text"] {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .new-plant-form button {
+        width: 100%;
+    }
 }
