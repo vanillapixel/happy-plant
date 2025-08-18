@@ -62,6 +62,85 @@
         </header>
 
         <!-- Quick reference table -->
+        <!-- Weather-based watering suggestion -->
+        <section
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden mb-6">
+            <div class="p-4 flex items-start gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                        <span>Location:</span>
+                        <span class="font-medium" v-text="weather.location || weather.city"></span>
+                    </div>
+                    <!-- Today details and suggestion -->
+                    <div class="mt-2" v-if="weather.today">
+                        <div class="flex flex-col md:flex-row md:items-center gap-4">
+                            <!-- Today weather summary -->
+                            <div class="flex items-center gap-3 min-w-[220px]">
+                                <i :class="weather.today.icon" class="text-2xl"></i>
+                                <div class="text-sm">
+                                    <div class="font-medium">Today</div>
+                                    <div class="text-slate-600 dark:text-slate-300">
+                                        <span v-if="weather.today.tempMax != null">{{ Math.round(weather.today.tempMax)
+                                            }}°C</span>
+                                        <span v-if="weather.today.precipSum != null"> · {{
+                                            Number(weather.today.precipSum).toFixed(1) }}mm</span>
+                                        <span v-if="weather.today.precipProb != null"> · {{
+                                            Math.round(weather.today.precipProb) }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Watering suggestion -->
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="flex items-start gap-2">
+                                    <span aria-label="watering level" class="inline-flex items-center gap-1">
+                                        <i v-for="n in 3" :key="n" class="fas fa-tint"
+                                            :class="n <= weather.today.level ? 'text-sky-600' : 'text-slate-300 dark:text-slate-600'"></i>
+                                    </span>
+                                    <span class="text-sm" :class="[
+                                        weather.today.level === 1 ? 'text-emerald-600' : '',
+                                        weather.today.level === 2 ? 'text-amber-600' : '',
+                                        weather.today.level === 3 ? 'text-orange-600' : ''
+                                    ]">
+                                        {{
+                                        weather.today.level === 1 ? 'Light watering' :
+                                        weather.today.level === 2 ? 'Moderate watering' :
+                                        weather.today.level === 3 ? 'Heavy watering' : 'Unknown'
+                                        }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-slate-400 mt-1" v-if="weather.today.reason">
+                                    {{ weather.today.reason }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Next 2 days -->
+                    <div class="mt-4" v-if="weather.next && weather.next.length">
+                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Forecast for the next 2
+                            days</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div v-for="(d, i) in weather.next" :key="d.date"
+                                class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-700/40">
+                                <i :class="d.icon" class="text-xl"></i>
+                                <div class="text-sm">
+                                    <div class="font-medium">{{ d.date }}</div>
+                                    <div class="text-slate-600 dark:text-slate-300">
+                                        <span v-if="d.tempMax != null">{{ Math.round(d.tempMax) }}°C</span>
+                                        <span v-if="d.precipSum != null"> · {{ Number(d.precipSum).toFixed(1)
+                                            }}mm</span>
+                                        <span v-if="d.precipProb != null"> · {{ Math.round(d.precipProb) }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-slate-500 dark:text-slate-400" v-if="weather.error">{{ weather.error
+                        }}</div>
+                </div>
+                <i class="fas fa-rotate-right mr-2"></i>
+            </div>
+        </section>
+
         <section id="instructions-section"
             class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden mb-6">
             <table class="w-full table-auto" aria-label="Happy plants table">
@@ -286,6 +365,11 @@
                             <label class="block text-sm font-medium text-slate-400">Password
                                 <input type="password" v-model="registerForm.password" minlength="8" required
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
+                            </label>
+                            <label class="block text-sm font-medium text-slate-400">City (for weather)
+                                <input type="text" v-model.trim="registerForm.city" placeholder="e.g., Utrecht"
+                                    class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
+                                <span class="text-xs text-slate-500">Defaults to Utrecht, Netherlands if empty.</span>
                             </label>
                             <button type="submit"
                                 class="w-full rounded-md bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">Create

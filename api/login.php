@@ -16,8 +16,18 @@ try {
     $pdo = new PDO("sqlite:$path");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Minimal bootstrap for dev: ensure users table exists (migration recommended)
+    $pdo->exec('CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        username TEXT UNIQUE,
+        password TEXT NOT NULL,
+        city TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )');
+
     // Try email first, then username
-    $stmt = $pdo->prepare('SELECT id, email, username, password FROM users WHERE lower(email) = lower(?) OR username = ? LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, username, password, city FROM users WHERE lower(email) = lower(?) OR username = ? LIMIT 1');
     $stmt->execute([$identifier, $identifier]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -29,8 +39,9 @@ try {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['email'] = $user['email'] ?? null;
     $_SESSION['username'] = $user['username'] ?? null;
+    $_SESSION['city'] = $user['city'] ?? null;
 
-    echo json_encode(['status' => 'success', 'email' => $user['email'], 'username' => $user['username']]);
+    echo json_encode(['status' => 'success', 'email' => $user['email'], 'username' => $user['username'], 'city' => $user['city'] ?? null]);
 } catch (Throwable $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }

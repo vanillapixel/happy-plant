@@ -2,6 +2,7 @@ import { drawChart } from './chart.js';
 import { fetchReadings } from './api/readings.js';
 import { fetchSpecies, fetchUserPlants, createUserPlant, createSpeciesByName, searchSpecies, fetchThresholdsByUserPlant } from './api/plants.js';
 import { showNotification } from './notifications.js';
+import { getWaterSuggestion } from './api/weather.js';
 
 const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
 
@@ -14,7 +15,7 @@ createApp({
         const authTab = ref('login');
 
         const loginForm = ref({ identifier: '', password: '' });
-        const registerForm = ref({ email: '', username: '', password: '' });
+        const registerForm = ref({ email: '', username: '', password: '', city: '' });
 
         const species = ref([]); // from species DB
         const speciesSuggestions = ref([]);
@@ -27,6 +28,7 @@ createApp({
         const newPlantForm = ref({ species_name: '', label: '' });
         const chartData = ref([]);
         const thresholds = ref(null);
+        const weather = ref({ city: 'Utrecht', location: '', today: null, next: [], error: '' });
 
         function notify(msg) { showNotification(msg); }
 
@@ -35,6 +37,11 @@ createApp({
                 const r = await fetch('./api/auth.php');
                 const s = await r.json();
                 authed.value = !!s.authenticated;
+                if (s.city) {
+                    weather.value.city = s.city || 'Utrecht';
+                } else {
+                    weather.value.city = 'Utrecht';
+                }
             } catch { }
         }
 
@@ -75,9 +82,11 @@ createApp({
                     authed.value = true;
                     showAuthModal.value = false;
                     notify('Signed in');
+                    if (result.city) weather.value.city = result.city || 'Utrecht';
                     // Immediately load plants and render chart scoped to this user
                     await fetchPlants();
                     await render();
+                    await refreshWeather();
                 } else {
                     notify('Error: ' + result.message);
                 }
@@ -213,6 +222,19 @@ createApp({
             }
         }
 
+        async function refreshWeather() {
+            const city = weather.value.city || 'Utrecht';
+            const res = await getWaterSuggestion(city);
+            if (res.status === 'success') {
+                weather.value.location = res.location;
+                weather.value.today = res.today;
+                weather.value.next = res.next || [];
+                weather.value.error = '';
+            } else {
+                weather.value.error = res.message || 'Failed to load weather';
+            }
+        }
+
         function onPlantChange() {
             if (!addForm.value.user_plant_id) {
                 addForm.value.user_plant_id = selectedUserPlantId.value || '';
@@ -225,6 +247,7 @@ createApp({
             await fetchMe();
             await fetchPlants();
             await render();
+            await refreshWeather();
         });
 
         // Keep body scroll locked when any modal is open
@@ -261,6 +284,8 @@ createApp({
             saveReading,
             chartData
             , thresholds
+            , weather
+            , refreshWeather
         };
     }
 }).mount('#app');
