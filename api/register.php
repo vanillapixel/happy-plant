@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/db.php';
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -26,17 +27,7 @@ try {
         exit;
     }
 
-    $path = __DIR__ . '/../data/plants.sqlite';
-    $pdo = new PDO("sqlite:$path");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->exec('CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        username TEXT UNIQUE,
-        password TEXT NOT NULL,
-        city TEXT,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )');
+    $pdo = hp_db();
 
     // Schema assumed to be managed via migration in development environment
 

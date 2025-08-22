@@ -1,20 +1,12 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/db.php';
 session_start();
 if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['status'=>'error','message'=>'Unauthorized']); exit; }
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 try {
-    $db = new PDO('sqlite:../data/plants.sqlite');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // Ensure required tables exist (user plants only)
-    $db->exec("CREATE TABLE IF NOT EXISTS user_plants (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        species_id INTEGER NOT NULL,
-        label TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )");
+    $db = hp_db();
 
     if ($method === 'GET') {
         // fetch user plants from main DB
@@ -23,8 +15,7 @@ try {
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         // map species names from species DB
-        $sdb = new PDO('sqlite:' . (__DIR__ . '/../data/species.sqlite'));
-        $sdb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $sdb = hp_species_db();
         $out = [];
         foreach ($rows as $r) {
             $name = null; $sid = (int)$r['species_id'];

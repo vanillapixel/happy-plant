@@ -1,0 +1,45 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run unit tests with Vitest",
+			"type": "shell",
+			"command": "npm run -s test:unit",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Install dev dependencies",
+			"type": "shell",
+			"command": "npm install --silent",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Run unit tests with Vitest",
+			"type": "shell",
+			"command": "npx -y vitest run",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Install jsdom dev dependency",
+			"type": "shell",
+			"command": "npm install --save-dev --silent jsdom",
+			"group": "build"
+		},
+		{
+			"label": "Run unit tests with Vitest",
+			"type": "shell",
+			"command": "npm run -s test:unit",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		}
+	]
+}

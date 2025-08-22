@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/db.php';
 
 session_start();
 if (!isset($_SESSION['user_id'])) {
@@ -8,44 +9,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$dbFile = '../data/plants.sqlite';
-
-if (!file_exists($dbFile)) {
-    // DB file missing, return empty array
-    echo json_encode([]);
-    exit;
-}
-
 try {
-    $db = new PDO("sqlite:$dbFile");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Ensure the table exists
-    $db->exec("
-        CREATE TABLE IF NOT EXISTS readings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            plant TEXT NOT NULL,
-            ph REAL,
-            moisture INTEGER,
-            date TEXT DEFAULT CURRENT_TIMESTAMP,
-            user_id INTEGER
-        )
-    ");
-
-    // Ensure user_id column exists for older DBs
-    try {
-        $cols = $db->query('PRAGMA table_info(readings)')->fetchAll(PDO::FETCH_ASSOC);
-        $hasUser = false;
-        $hasUserPlant = false;
-        foreach ($cols as $c) { if (strcasecmp($c['name'], 'user_id') === 0) { $hasUser = true; break; } }
-        if (!$hasUser) {
-            $db->exec('ALTER TABLE readings ADD COLUMN user_id INTEGER');
-        }
-        foreach ($cols as $c) { if (strcasecmp($c['name'], 'user_plant_id') === 0) { $hasUserPlant = true; break; } }
-        if (!$hasUserPlant) {
-            $db->exec('ALTER TABLE readings ADD COLUMN user_plant_id INTEGER');
-        }
-    } catch (Throwable $e) { /* ignore */ }
+    $db = hp_db();
 
     // Filters: prefer user_plant_id; fallback to plant name for legacy
     $userPlantId = isset($_GET['user_plant_id']) ? intval($_GET['user_plant_id']) : null;
