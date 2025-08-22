@@ -1,2 +1,3 @@
 todo
-data/plants.sqlite
+/data
+/node_modules

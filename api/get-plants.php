@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/db.php';
 session_start();
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
@@ -7,14 +8,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$dbFile = '../data/plants.sqlite';
-if (!file_exists($dbFile)) {
-    echo json_encode([]);
-    exit;
-}
 try {
-    $db = new PDO("sqlite:$dbFile");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = hp_db();
     // ensure table exists
     $db->exec("CREATE TABLE IF NOT EXISTS readings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

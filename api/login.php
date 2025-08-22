@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/db.php';
 session_start();
 
 try {
@@ -12,9 +13,7 @@ try {
     $identifier = trim($data['identifier']);
     $password = $data['password'];
 
-    $path = __DIR__ . '/../data/plants.sqlite';
-    $pdo = new PDO("sqlite:$path");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = hp_db();
 
     // Minimal bootstrap for dev: ensure users table exists (migration recommended)
     $pdo->exec('CREATE TABLE IF NOT EXISTS users (

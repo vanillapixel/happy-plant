@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/db.php';
 session_start();
 if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['status'=>'error','message'=>'Unauthorized']); exit; }
 
@@ -15,8 +16,7 @@ try {
     }
 
     if ($userPlantId > 0) {
-        $db = new PDO('sqlite:../data/plants.sqlite');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = hp_db();
         // Resolve species_id for this user_plant and ensure it belongs to the user
         $stmt = $db->prepare('SELECT species_id FROM user_plants WHERE id = :id AND user_id = :uid');
         $stmt->execute([':id' => $userPlantId, ':uid' => $_SESSION['user_id']]);
@@ -30,8 +30,7 @@ try {
     }
 
     // Fetch thresholds from species DB
-    $sdb = new PDO('sqlite:' . (__DIR__ . '/../data/species.sqlite'));
-    $sdb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $sdb = hp_species_db();
     $stmt = $sdb->prepare('SELECT id, common_name, scientific_name, ph_min, ph_max, soil_moisture_morning, soil_moisture_night FROM species WHERE id = :sid');
     $stmt->execute([':sid' => $speciesId]);
     $spec = $stmt->fetch(PDO::FETCH_ASSOC);
