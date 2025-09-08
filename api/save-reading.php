@@ -27,6 +27,7 @@ try {
         plant TEXT NOT NULL,
         ph REAL NOT NULL,
         moisture INTEGER NOT NULL,
+        fertility INTEGER,
         date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         user_id INTEGER
     )");
@@ -45,10 +46,13 @@ try {
     try {
         $cols = $pdo->query('PRAGMA table_info(readings)')->fetchAll(PDO::FETCH_ASSOC);
         $hasUserPlant = false;
-        foreach ($cols as $c) { if (strcasecmp($c['name'], 'user_plant_id') === 0) { $hasUserPlant = true; break; } }
-        if (!$hasUserPlant) {
-            $pdo->exec('ALTER TABLE readings ADD COLUMN user_plant_id INTEGER');
+        $hasFertility = false;
+        foreach ($cols as $c) {
+            if (strcasecmp($c['name'], 'user_plant_id') === 0) { $hasUserPlant = true; }
+            if (strcasecmp($c['name'], 'fertility') === 0) { $hasFertility = true; }
         }
+        if (!$hasUserPlant) { $pdo->exec('ALTER TABLE readings ADD COLUMN user_plant_id INTEGER'); }
+        if (!$hasFertility) { $pdo->exec('ALTER TABLE readings ADD COLUMN fertility INTEGER'); }
     } catch (Throwable $e) { /* ignore */ }
 
     if (isset($data['user_plant_id'])) {
@@ -62,12 +66,12 @@ try {
         } catch (Throwable $e) { /* ignore */ }
 
         // Include plant column in insert for compatibility
-        $stmt = $pdo->prepare("INSERT INTO readings (user_plant_id, plant, ph, moisture, user_id) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$data['user_plant_id'], $plantLabel, $data['ph'], $data['moisture'], $_SESSION['user_id']]);
+    $stmt = $pdo->prepare("INSERT INTO readings (user_plant_id, plant, ph, moisture, fertility, user_id) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$data['user_plant_id'], $plantLabel, $data['ph'], $data['moisture'], $data['fertility'] ?? null, $_SESSION['user_id']]);
     } else {
         // legacy path with plant label string
-        $stmt = $pdo->prepare("INSERT INTO readings (plant, ph, moisture, user_id) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$data['plant'], $data['ph'], $data['moisture'], $_SESSION['user_id']]);
+    $stmt = $pdo->prepare("INSERT INTO readings (plant, ph, moisture, fertility, user_id) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$data['plant'], $data['ph'], $data['moisture'], $data['fertility'] ?? null, $_SESSION['user_id']]);
     }
 
     echo json_encode(['status' => 'success']);

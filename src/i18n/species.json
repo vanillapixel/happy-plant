@@ -1,0 +1,28 @@
+{
+    "en": {
+        "Basil": "Basil",
+        "Sage": "Sage",
+        "Cherry Tomatoes": "Cherry Tomatoes",
+        "Cat Grass": "Cat Grass",
+        "Mint": "Mint",
+        "Thyme": "Thyme",
+        "Jasmine": "Jasmine",
+        "Aloe Vera": "Aloe Vera",
+        "Dipladenia": "Dipladenia",
+        "Asparagus Fern": "Asparagus Fern",
+        "Geranium": "Geranium"
+    },
+    "it": {
+        "Basil": "Basilico",
+        "Sage": "Salvia",
+        "Cherry Tomatoes": "Pomodorini",
+        "Cat Grass": "Erba gatta",
+        "Mint": "Menta",
+        "Thyme": "Timo",
+        "Jasmine": "Gelsomino",
+        "Aloe Vera": "Aloe",
+        "Dipladenia": "Dipladenia",
+        "Asparagus Fern": "Asparagina",
+        "Geranium": "Geranio"
+    }
+}

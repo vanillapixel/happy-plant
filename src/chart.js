@@ -18,6 +18,9 @@ export function getThresholdLines(type, thresholds) {
             { value: day, color: '#ffd13b', label: '' },
             { value: night, color: '#9687eb', label: '' }
         ];
+    } else if (type === 'fertility') {
+        // No fixed thresholds yet; could add guidelines later
+        return [];
     }
     return [];
 }
@@ -41,8 +44,22 @@ export function drawChart(type = 'ph', data = [], thresholds = null) {
     const ctx = canvas.getContext('2d');
 
     const sorted = sortByDate([...data]);
-    const labels = sorted.map(item => (new Date(item.date)).toLocaleString());
-    const values = sorted.map(item => (type === 'ph' ? item.ph : item.moisture));
+    let filtered = sorted;
+    if (type === 'fertility') {
+        filtered = sorted.filter(item => item.fertility !== null && item.fertility !== undefined);
+        if (!filtered.length) return; // nothing to plot
+    }
+    // Compact date labels: drop year, keep month/day and time (HH:MM)
+    const labels = filtered.map(item => {
+        const d = new Date(item.date);
+        return d.toLocaleString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    });
+    const values = filtered.map(item => (type === 'ph' ? item.ph : (type === 'moisture' ? item.moisture : item.fertility)));
     const thresholdsLines = getThresholdLines(type, thresholds);
 
     const thresholdLinesPlugin = {
@@ -73,10 +90,10 @@ export function drawChart(type = 'ph', data = [], thresholds = null) {
         data: {
             labels,
             datasets: [{
-                label: type === 'ph' ? 'pH Level' : 'Moisture Level (%)',
+                label: type === 'ph' ? 'pH Level' : (type === 'moisture' ? 'Moisture Level (%)' : 'Fertility (Low/Nor/High)'),
                 data: values,
                 fill: false,
-                borderColor: '#47b8db',
+                borderColor: type === 'fertility' ? '#7c3aed' : '#47b8db',
                 tension: 0.3,
                 pointRadius: 5,
                 pointHoverRadius: 7
@@ -84,7 +101,15 @@ export function drawChart(type = 'ph', data = [], thresholds = null) {
         },
         options: {
             scales: {
-                y: {
+                y: type === 'fertility' ? {
+                    beginAtZero: true,
+                    min: -0.1,
+                    max: 2.1,
+                    ticks: {
+                        stepSize: 1,
+                        callback: (value) => ({ 0: 'Low', 1: 'Nor', 2: 'High' }[value] ?? value)
+                    }
+                } : {
                     beginAtZero: false,
                     suggestedMin: type === 'ph' ? 4 : 0,
                     suggestedMax: type === 'ph' ? 10 : 100
@@ -92,8 +117,10 @@ export function drawChart(type = 'ph', data = [], thresholds = null) {
                 x: {
                     type: 'category',
                     ticks: {
-                        maxRotation: 45,
-                        minRotation: 30
+                        maxRotation: 35,
+                        minRotation: 0,
+                        autoSkip: true,
+                        font: { size: 10 }
                     }
                 }
             },

@@ -189,24 +189,6 @@ tbody tr+tr td {
     margin-top: 10px
 }
 
-button {
-    border: 0;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: var(--accent);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: .25s ease-in-out;
-
-    &:hover {
-        color: var(--accent__hover);
-    }
-}
-
 button.ghost {
     background: transparent;
     color: var(--muted);
@@ -407,6 +389,110 @@ i.fas.fa-moon {
     gap: 12px;
 }
 
+/* Custom range slider for pH & moisture */
+input.hp-slider {
+    appearance: none;
+    height: 4px;
+    border-radius: 999px;
+    outline: none;
+    width: 100%;
+    background: #cbd5e1;
+    position: relative;
+}
+
+input.hp-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+    background: var(--thumb-color, transparent);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+}
+
+input.hp-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.05);
+}
+
+input.hp-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+    background: var(--thumb-color, transparent);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+}
+
+input.hp-slider::-moz-range-thumb:hover {
+    transform: scale(1.05);
+}
+
+input.hp-slider:active::-webkit-slider-thumb {
+    transform: scale(1.08);
+}
+
+input.hp-slider:active::-moz-range-thumb {
+    transform: scale(1.08);
+}
+
+/* === Track (WebKit: Chrome, Safari, Edge) === */
+.hp-slider::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 8px;
+    background: inherit;
+    /* use parent background */
+}
+
+/* === Thumb (WebKit: Chrome, Safari, Edge) === */
+.hp-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--thumb-color, #fca5a5);
+    /* use your CSS var */
+    border: 2px solid white;
+    cursor: pointer;
+    margin-top: -6px;
+    /* center thumb */
+    transition: background 0.3s;
+}
+
+/* === Track (Firefox) === */
+.hp-slider::-moz-range-track {
+    height: 8px;
+    border-radius: 8px;
+    background: inherit;
+}
+
+/* === Thumb (Firefox) === */
+.hp-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--thumb-color, #fca5a5);
+    border: 2px solid white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+input.hp-slider::-moz-range-thumb:hover {
+    transform: scale(1.05);
+}
+
+input.hp-slider:active::-webkit-slider-thumb {
+    transform: scale(1.08);
+}
+
+input.hp-slider:active::-moz-range-thumb {
+    transform: scale(1.08);
+}
+
 .hidden {
     display: none;
 }
@@ -435,43 +521,11 @@ i.fas.fa-moon {
     border-color: var(--accent);
 }
 
-/* --- Improved form styling for Select Plant and Add Plant --- */
-#plant-selection,
-.new-plant-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 16px;
-    border: 1px solid var(--hp-border);
-    border-radius: 10px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    margin: 12px 0;
-}
-
 #plant-selection label,
 .new-plant-form label {
     font-weight: 600;
     color: var(--hp-text);
     margin-right: 4px;
-}
-
-/* Controls inside the two forms */
-select,
-input[type="text"] {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border: 1px solid var(--hp-border);
-    border-radius: 8px;
-    background-color: #fff;
-    color: #1f2937;
-    padding: 10px 40px 10px 12px;
-    font-size: 14px;
-    line-height: 1.2;
-    min-width: 220px;
 }
 
 #plant-selection select:focus,
@@ -480,35 +534,6 @@ input[type="text"] {
     outline: none;
     border-color: var(--hp-primary);
     box-shadow: 0 0 0 3px rgba(71, 184, 219, 0.2);
-}
-
-/* Override global select background arrow for these forms */
-#plant-selection select,
-.new-plant-form select {
-    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2347b8db"%3E%3Cpath d="M7 10l5 5 5-5z"/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-}
-
-/* Primary button style */
-.new-plant-form button {
-    background-color: var(--hp-primary);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: filter 0.2s ease, transform 0.02s ease;
-}
-
-.new-plant-form button:hover {
-    filter: brightness(1.05);
-}
-
-.new-plant-form button:active {
-    transform: translateY(1px);
 }
 
 /* Species autocomplete combo */

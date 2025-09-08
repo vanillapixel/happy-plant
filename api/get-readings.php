@@ -27,6 +27,7 @@ try {
             plant TEXT NOT NULL,
             ph REAL,
             moisture INTEGER,
+            fertility INTEGER,
             date TEXT DEFAULT CURRENT_TIMESTAMP,
             user_id INTEGER
         )
@@ -37,14 +38,15 @@ try {
         $cols = $db->query('PRAGMA table_info(readings)')->fetchAll(PDO::FETCH_ASSOC);
         $hasUser = false;
         $hasUserPlant = false;
-        foreach ($cols as $c) { if (strcasecmp($c['name'], 'user_id') === 0) { $hasUser = true; break; } }
-        if (!$hasUser) {
-            $db->exec('ALTER TABLE readings ADD COLUMN user_id INTEGER');
+        $hasFertility = false;
+        foreach ($cols as $c) {
+            if (strcasecmp($c['name'], 'user_id') === 0) { $hasUser = true; }
+            if (strcasecmp($c['name'], 'user_plant_id') === 0) { $hasUserPlant = true; }
+            if (strcasecmp($c['name'], 'fertility') === 0) { $hasFertility = true; }
         }
-        foreach ($cols as $c) { if (strcasecmp($c['name'], 'user_plant_id') === 0) { $hasUserPlant = true; break; } }
-        if (!$hasUserPlant) {
-            $db->exec('ALTER TABLE readings ADD COLUMN user_plant_id INTEGER');
-        }
+        if (!$hasUser) { $db->exec('ALTER TABLE readings ADD COLUMN user_id INTEGER'); }
+        if (!$hasUserPlant) { $db->exec('ALTER TABLE readings ADD COLUMN user_plant_id INTEGER'); }
+        if (!$hasFertility) { $db->exec('ALTER TABLE readings ADD COLUMN fertility INTEGER'); }
     } catch (Throwable $e) { /* ignore */ }
 
     // Filters: prefer user_plant_id; fallback to plant name for legacy
