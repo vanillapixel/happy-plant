@@ -11,6 +11,8 @@ try {
     $email = strtolower(trim($data['email']));
     $username = trim($data['username']);
     $password = $data['password'];
+    $city = isset($data['city']) ? trim($data['city']) : '';
+    if ($city === '') { $city = 'Utrecht'; }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo json_encode(['status' => 'error', 'message' => 'Invalid email']);
         exit;
@@ -32,20 +34,11 @@ try {
         email TEXT UNIQUE NOT NULL,
         username TEXT UNIQUE,
         password TEXT NOT NULL,
+        city TEXT,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )');
 
-    // Ensure username column exists for older DBs
-    try {
-        $cols = $pdo->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_ASSOC);
-        $hasUsername = false;
-        foreach ($cols as $c) {
-            if (strcasecmp($c['name'], 'username') === 0) { $hasUsername = true; break; }
-        }
-        if (!$hasUsername) {
-            $pdo->exec('ALTER TABLE users ADD COLUMN username TEXT UNIQUE');
-        }
-    } catch (Throwable $e) { /* ignore */ }
+    // Schema assumed to be managed via migration in development environment
 
     // Uniqueness checks
     $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? OR username = ? LIMIT 1');
@@ -56,8 +49,8 @@ try {
     }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare('INSERT INTO users (email, username, password) VALUES (?, ?, ?)');
-    $stmt->execute([$email, $username, $hash]);
+    $stmt = $pdo->prepare('INSERT INTO users (email, username, password, city) VALUES (?, ?, ?, ?)');
+    $stmt->execute([$email, $username, $hash, $city]);
 
     echo json_encode(['status' => 'success']);
 } catch (Throwable $e) {
