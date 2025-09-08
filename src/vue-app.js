@@ -2,6 +2,8 @@ import { drawChart } from './chart.js';
 import { fetchReadings } from './api/readings.js';
 import { fetchSpecies, fetchUserPlants, createUserPlant, createSpeciesByName, searchSpecies, fetchThresholdsByUserPlant } from './api/plants.js';
 import { showNotification } from './notifications.js';
+import { loadSpeciesTranslations, tSpecies } from './i18n/index.js';
+import { plantSuggestions, getPlantSuggestions, computeSliderStyle } from './plant-suggestions.js';
 import { getWaterSuggestion } from './api/weather.js';
 
 const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
@@ -18,17 +20,52 @@ createApp({
         const registerForm = ref({ email: '', username: '', password: '', city: '' });
 
         const species = ref([]); // from species DB
+        const locale = ref('en');
+        const speciesLocaleMap = ref({});
         const speciesSuggestions = ref([]);
         const speciesError = ref('');
         const userPlants = ref([]); // [{id,label,species,species_id}]
         const selectedUserPlantId = ref('');
         const dataType = ref('ph');
 
-        const addForm = ref({ user_plant_id: '', ph: null, moisture: null });
+        const addForm = ref({ user_plant_id: '', ph: null, moisture: null, fertility: null });
         const newPlantForm = ref({ species_name: '', label: '' });
         const chartData = ref([]);
         const thresholds = ref(null);
         const weather = ref({ city: 'Utrecht', location: '', today: null, next: [], error: '' });
+
+        const currentSpeciesCommon = computed(() => {
+            const up = userPlants.value.find(p => String(p.id) === String(addForm.value.user_plant_id));
+            return (up?.species || '').toLowerCase();
+        });
+        const currentPlantSuggestions = computed(() => {
+            return getPlantSuggestions(currentSpeciesCommon.value, locale.value);
+        });
+
+        // Slider styling + state
+        const phInRange = computed(() => {
+            if (addForm.value.ph == null) return false;
+            const lo = thresholds.value?.ph_min ?? 6;
+            const hi = thresholds.value?.ph_max ?? 7;
+            return addForm.value.ph >= lo && addForm.value.ph <= hi;
+        });
+        const moistureInRange = computed(() => {
+            if (addForm.value.moisture == null) return false;
+            const lo = thresholds.value?.moisture_morning ?? 60;
+            const hi = thresholds.value?.moisture_night ?? 75;
+            // treat acceptable inside [lo, hi]
+            return addForm.value.moisture >= lo && addForm.value.moisture <= hi;
+        });
+        const phSliderStyle = computed(() => {
+            const lo = thresholds.value?.ph_min ?? 6;
+            const hi = thresholds.value?.ph_max ?? 7;
+            return computeSliderStyle(lo, hi, 0, 14, phInRange.value);
+        });
+        const moistureSliderStyle = computed(() => {
+            const lo = thresholds.value?.moisture_morning ?? 60;
+            const hi = thresholds.value?.moisture_night ?? 75;
+            return computeSliderStyle(lo, hi, 0, 100, moistureInRange.value);
+        });
 
         function notify(msg) { showNotification(msg); }
 
@@ -132,14 +169,19 @@ createApp({
                     body: JSON.stringify({
                         user_plant_id: addForm.value.user_plant_id ? Number(addForm.value.user_plant_id) : undefined,
                         ph: addForm.value.ph,
-                        moisture: addForm.value.moisture
+                        moisture: addForm.value.moisture,
+                        fertility: addForm.value.fertility
                     })
                 });
                 const r = await res.json();
                 if (r.status === 'success') {
                     notify('Reading saved successfully!');
-                    showAddModal.value = false;
+                    // Keep modal open for rapid entry; clear inputs for next reading
                     await render();
+                    addForm.value.ph = null;
+                    addForm.value.moisture = null;
+                    // keep fertility selection for convenience (comment out next line to retain)
+                    // addForm.value.fertility = null;
                 } else {
                     notify('Error: ' + r.message);
                 }
@@ -147,6 +189,24 @@ createApp({
                 notify('Error: ' + e.message);
             }
         }
+
+        // Navigate between user's plants inside the Add Reading modal
+        function goToPlant(offset) {
+            const list = userPlants.value;
+            if (!list.length) return;
+            let idx = list.findIndex(p => String(p.id) === String(addForm.value.user_plant_id));
+            if (idx === -1) idx = 0;
+            let newIdx = idx + offset;
+            if (newIdx < 0) newIdx = list.length - 1;
+            if (newIdx >= list.length) newIdx = 0;
+            const newPlant = list[newIdx];
+            addForm.value.user_plant_id = String(newPlant.id);
+            // sync global selected plant so chart + thresholds refresh
+            selectedUserPlantId.value = String(newPlant.id);
+            render();
+        }
+        const goPrevPlant = () => goToPlant(-1);
+        const goNextPlant = () => goToPlant(1);
 
         async function fetchPlants() {
             try {
@@ -156,6 +216,8 @@ createApp({
                 if (!selectedUserPlantId.value && userPlants.value.length) {
                     selectedUserPlantId.value = String(userPlants.value[0].id);
                 }
+                // Load translations lazily
+                speciesLocaleMap.value = await loadSpeciesTranslations(locale.value);
             } catch { }
         }
 
@@ -284,6 +346,15 @@ createApp({
             saveReading,
             chartData
             , thresholds
+            , tSpecies
+            , locale
+            , goPrevPlant
+            , goNextPlant
+            , currentPlantSuggestions
+            , phSliderStyle
+            , moistureSliderStyle
+            , phInRange
+            , moistureInRange
             , weather
             , refreshWeather
         };
