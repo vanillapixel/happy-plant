@@ -62,12 +62,14 @@ createApp({
         const phSliderStyle = computed(() => {
             const lo = thresholds.value?.ph_min ?? 6;
             const hi = thresholds.value?.ph_max ?? 7;
-            return computeSliderStyle(lo, hi, 0, 14, phInRange.value);
+            const defined = addForm.value.ph != null;
+            return computeSliderStyle(lo, hi, 3, 10, phInRange.value, defined);
         });
         const moistureSliderStyle = computed(() => {
             const lo = thresholds.value?.moisture_morning ?? 60;
             const hi = thresholds.value?.moisture_night ?? 75;
-            return computeSliderStyle(lo, hi, 0, 100, moistureInRange.value);
+            const defined = addForm.value.moisture != null;
+            return computeSliderStyle(lo, hi, 0, 100, moistureInRange.value, defined);
         });
 
         function notify(msg) { showNotification(msg); }
@@ -181,10 +183,10 @@ createApp({
                     notify('Reading saved successfully!');
                     // Keep modal open for rapid entry; clear inputs for next reading
                     await render();
+                    goNextPlant()
                     addForm.value.ph = null;
                     addForm.value.moisture = null;
-                    // keep fertility selection for convenience (comment out next line to retain)
-                    // addForm.value.fertility = null;
+                    addForm.value.fertility = null;
                 } else {
                     notify('Error: ' + r.message);
                 }
@@ -372,22 +374,22 @@ createApp({
             addUserPlant,
             fetchPlants,
             saveReading,
-            chartData
-            , thresholds
-            , tSpecies
-            , locale
-            , goPrevPlant
-            , goNextPlant
-            , currentPlantSuggestions
-            , phSliderStyle
-            , moistureSliderStyle
-            , phInRange
-            , moistureInRange
-            , weather
-            , refreshWeather
-            , t
-            , uiMap
-            , changeLocale
+            chartData,
+            thresholds,
+            tSpecies,
+            locale,
+            goPrevPlant,
+            goNextPlant,
+            currentPlantSuggestions,
+            phSliderStyle,
+            moistureSliderStyle,
+            phInRange,
+            moistureInRange,
+            weather,
+            refreshWeather,
+            t,
+            uiMap,
+            changeLocale
         };
     }
 }).mount('#app');

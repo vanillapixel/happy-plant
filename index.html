@@ -298,9 +298,9 @@
                     class="z-10 absolute top-3 right-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                     @click="closeModals"><i class="fas fa-times"></i></button>
                 <div class="p-6">
-                    <form class="space-y-6" @submit.prevent="saveReading">
+                    <form class="flex gap-6 flex-col" @submit.prevent="saveReading">
                         <div>
-                            <p class="block text-sm font-medium text-slate-300 mb-2" v-text="t('modal_select_plant')">
+                            <p class="block text-sm font-medium text-slate-500 mb-2" v-text="t('modal_select_plant')">
                             </p>
                             <div class="flex items-center gap-2">
                                 <button type="button" @click="goPrevPlant" :disabled="!userPlants.length"
@@ -316,7 +316,7 @@
                                         class="text-sm fas fa-chevron-right"></i></button>
                             </div>
                             <ul v-if="currentPlantSuggestions.length"
-                                class="mt-3 space-y-1 text-xs text-slate-600 dark:text-slate-300 list-disc pl-4">
+                                class="mt-4 space-y-1 text-xs text-slate-600 dark:text-slate-300 list-disc pl-4">
                                 <li v-for="(sug,i) in currentPlantSuggestions" :key="i">{{ sug }}</li>
                             </ul>
                         </div>
@@ -337,7 +337,7 @@
                             </div>
                             <div class="block text-sm font-medium text-slate-500">
                                 {{ t('fertility_label') }}
-                                <div class="mt-1 flex items-center gap-3">
+                                <div class="mt-2 flex items-center gap-3">
                                     <button type="button" @click="addForm.fertility = 0"
                                         :class="addForm.fertility === 0 ? 'opacity-100 ring-2 ring-red-500' : 'opacity-60'"
                                         class="h-10 w-10 rounded-full border border-red-500 text-red-500 flex items-center justify-center transition-opacity bg-transparent"><i

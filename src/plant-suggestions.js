@@ -23,11 +23,12 @@ export function getPlantSuggestions(commonName, locale = 'en') {
     return entry[locale] || entry.en || [];
 }
 
-export function computeSliderStyle(lo, hi, min, max, valueInRange) {
+export function computeSliderStyle(lo, hi, min, max, valueInRange, valueDefined = true) {
     const start = ((lo - min) / (max - min)) * 100;
     const end = ((hi - min) / (max - min)) * 100;
+    const thumbColor = !valueDefined ? '#9ca3af' /* gray */ : (valueInRange ? '#4a8560ff' : '#ffae6bff');
     return {
         background: `linear-gradient(90deg, #e7e7e7ff ${start}%, #1b4e51 ${start}%, #1b4e51 ${end}%, #e7e7e7ff ${end}%)`,
-        '--thumb-color': valueInRange ? '#4a8560ff' : '#a86868ff'
+        '--thumb-color': thumbColor
     };
 }    
