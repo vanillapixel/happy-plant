@@ -90,7 +90,7 @@ export function drawChart(type = 'ph', data = [], thresholds = null) {
         data: {
             labels,
             datasets: [{
-                label: type === 'ph' ? 'pH Level' : (type === 'moisture' ? 'Moisture Level (%)' : 'Fertility (Low/Nor/High)'),
+                label: type === 'ph' ? 'pH Level' : (type === 'moisture' ? 'Moisture Level (%)' : (window.__hp_t ? window.__hp_t('fertility_dataset_label') : 'Fertility (Low/Nor/High)')),
                 data: values,
                 fill: false,
                 borderColor: type === 'fertility' ? '#7c3aed' : '#47b8db',

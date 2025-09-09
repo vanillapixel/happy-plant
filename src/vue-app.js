@@ -2,7 +2,7 @@ import { drawChart } from './chart.js';
 import { fetchReadings } from './api/readings.js';
 import { fetchSpecies, fetchUserPlants, createUserPlant, createSpeciesByName, searchSpecies, fetchThresholdsByUserPlant } from './api/plants.js';
 import { showNotification } from './notifications.js';
-import { loadSpeciesTranslations, tSpecies } from './i18n/index.js';
+import { loadSpeciesTranslations, loadUiTranslations, tSpecies, t, setLocale } from './i18n/index.js';
 import { plantSuggestions, getPlantSuggestions, computeSliderStyle } from './plant-suggestions.js';
 import { getWaterSuggestion } from './api/weather.js';
 
@@ -10,6 +10,8 @@ const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
 
 createApp({
     setup() {
+        // expose translation function placeholder early
+        window.__hp_t = t;
         const authed = ref(false);
         const authTitle = computed(() => (authed.value ? 'Sign out' : 'Sign in'));
         const showAuthModal = ref(false);
@@ -21,6 +23,7 @@ createApp({
 
         const species = ref([]); // from species DB
         const locale = ref('en');
+        const uiMap = ref({});
         const speciesLocaleMap = ref({});
         const speciesSuggestions = ref([]);
         const speciesError = ref('');
@@ -218,6 +221,7 @@ createApp({
                 }
                 // Load translations lazily
                 speciesLocaleMap.value = await loadSpeciesTranslations(locale.value);
+                uiMap.value = await loadUiTranslations(locale.value);
             } catch { }
         }
 
@@ -305,7 +309,31 @@ createApp({
         }
         function onTypeChange() { render(); }
 
+        function detectLocale() {
+            const nav = navigator.language || navigator.userLanguage || 'en';
+            const short = nav.split('-')[0].toLowerCase();
+            return ['en', 'it'].includes(short) ? short : 'en';
+        }
+
+        async function changeLocale(newLoc) {
+            locale.value = newLoc;
+            setLocale(newLoc);
+            speciesLocaleMap.value = await loadSpeciesTranslations(newLoc);
+            uiMap.value = await loadUiTranslations(newLoc);
+            // expose for non-vue modules (chart.js)
+            window.__hp_t = t;
+        }
+
+        // React to user changing locale from select (ref is auto-unwrapped in template)
+        watch(locale, (val, old) => {
+            if (val && val !== old) {
+                changeLocale(val);
+            }
+        });
+
         onMounted(async () => {
+            const detected = detectLocale();
+            await changeLocale(detected);
             await fetchMe();
             await fetchPlants();
             await render();
@@ -357,6 +385,9 @@ createApp({
             , moistureInRange
             , weather
             , refreshWeather
+            , t
+            , uiMap
+            , changeLocale
         };
     }
 }).mount('#app');
