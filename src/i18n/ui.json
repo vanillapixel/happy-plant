@@ -1,7 +1,6 @@
 {
     "en": {
         "app_title": "Happy plants",
-        "subtitle": "pH & moisture targets for quick daily checks",
         "table_plant": "Plant",
         "table_ph": "Ideal pH",
         "table_moisture": "Soil moisture (%)",
@@ -39,8 +38,7 @@
         "fertility_dataset_label": "Fertility (Low/Nor/High)"
     },
     "it": {
-        "app_title": "Piante felici",
-        "subtitle": "Obiettivi di pH e umidità per controlli rapidi giornalieri",
+        "app_title": "Happy plants",
         "table_plant": "Pianta",
         "table_ph": "pH ideale",
         "table_moisture": "Umidità del suolo (%)",
