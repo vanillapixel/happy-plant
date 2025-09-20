@@ -27,12 +27,29 @@ try {
         ['Cat Grass', 'Avena sativa (or Hordeum vulgare, Triticum aestivum)', 6.0, 7.0, 65, 85],
         ['Mint', 'Mentha spp.', 6.0, 7.0, 70, 85],
         ['Thyme', 'Thymus vulgaris', 6.0, 8.0, 30, 50],
-        // Newly requested species
         ['Jasmine', 'Jasminum spp.', 5.5, 7.5, 50, 65],
         ['Aloe Vera', 'Aloe barbadensis miller', 7.0, 8.5, 20, 30],
         ['Dipladenia', 'Mandevilla sanderi (Dipladenia)', 5.5, 6.5, 55, 70],
         ['Asparagus Fern', 'Asparagus setaceus (syn. plumosus)', 5.5, 6.5, 70, 85],
         ['Geranium', 'Pelargonium spp.', 6.0, 6.5, 45, 60],
+
+        ['Tradescantia', 'Tradescantia spp.', 5.8, 6.5, 55, 70],              // Miseria pelosa
+        ['Cyclamen', 'Cyclamen persicum', 5.5, 6.5, 55, 70],                 // Ciclamino
+        ['Pachyphytum hookeri', 'Pachyphytum hookeri', 6.1, 7.8, 20, 30],
+        ['Incense Plant', 'Plectranthus madagascariensis', 6.0, 7.5, 45, 60], // Incenso
+        ['Sedum palmeri', 'Sedum palmeri', 6.0, 7.5, 25, 40],                // Erba della Madonna
+        ['Aeonium arboreum', 'Aeonium arboreum', 6.0, 7.5, 20, 35],
+        ['Snake Plant', 'Sansevieria (Dracaena) trifasciata', 6.0, 7.5, 20, 30], // Sanseveria trifasciata
+        ['Sedum hernandezii', 'Sedum hernandezii', 6.0, 7.5, 25, 40],
+        ['Christmas Cactus', 'Schlumbergera truncata', 5.5, 6.5, 50, 65],     // Cactus di natale
+        ['Spider Plant', 'Chlorophytum comosum', 6.0, 7.2, 45, 60],          // Pianta ragno
+        ['Orange Tree', 'Citrus sinensis', 5.5, 6.5, 45, 60],                // Arancio
+        ['Strawberry', 'Fragaria × ananassa', 5.5, 6.5, 55, 70],             // Fragole
+        ['Cape Daisy', 'Osteospermum (Dimorphotheca) jucundum', 5.5, 6.5, 40, 55], // Dimorphoteca jucunda
+        ['Asparagus densiflorus', 'Asparagus densiflorus', 5.5, 6.5, 65, 80],
+        ['Agave americana', 'Agave americana', 6.0, 7.8, 15, 25],
+        ['Water Mint', 'Mentha aquatica', 6.0, 7.5, 80, 95],                 // Menta acquatica
+        ['Spearmint', 'Mentha spicata', 6.0, 7.5, 65, 85]                    // Menta spicata
     ];
 
     // Insert only missing species (idempotent migration)

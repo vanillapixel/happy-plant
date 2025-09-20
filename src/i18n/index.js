@@ -38,3 +38,19 @@ export function t(key) {
     if (!uiTranslations) return key;
     return (uiTranslations[currentLocale] && uiTranslations[currentLocale][key]) || key;
 }
+
+// Force reload helpers -------------------------------------------------
+// Invalidate both translation caches (ui + species). Next load* call will refetch.
+export function invalidateTranslations() {
+    speciesTranslations = null;
+    uiTranslations = null;
+}
+
+// Reload all translation maps for the given (or current) locale, bypassing cache.
+export async function reloadAllTranslations(locale = currentLocale) {
+    invalidateTranslations();
+    // Re-run the loaders explicitly so callers can await fresh maps.
+    const ui = await loadUiTranslations(locale);
+    const species = await loadSpeciesTranslations(locale);
+    return { ui, species };
+}

@@ -35,7 +35,14 @@
         "sign_out": "Sign out",
         "placeholder_species": "e.g., Basil",
         "placeholder_label": "e.g., Basil by window",
-        "fertility_dataset_label": "Fertility (Low/Nor/High)"
+        "fertility_dataset_label": "Fertility (Low/Nor/High)",
+        "species_suggestion_error": "Please select one of the suggested options",
+        "app_description": "Track pH, moisture & fertility for your plants, view charts and get weather‑based watering hints.",
+        "delete_plant": "Delete",
+        "confirm_delete_title": "Delete plant",
+        "confirm_delete_body": "Are you sure you want to delete this plant? Readings remain stored.",
+        "confirm_delete_cancel": "Cancel",
+        "confirm_delete_confirm": "Yes, delete"
     },
     "it": {
         "app_title": "Happy plants",
@@ -73,6 +80,13 @@
         "sign_out": "Esci",
         "placeholder_species": "es. Basilico",
         "placeholder_label": "es. Basilico finestra",
-        "fertility_dataset_label": "Fertilità (Bassa/Norm/Alta)"
+        "fertility_dataset_label": "Fertilità (Bassa/Norm/Alta)",
+        "species_suggestion_error": "Seleziona una delle opzioni suggerite",
+        "app_description": "Monitora pH, umidità e fertilità delle tue piante, visualizza grafici e ricevi consigli di irrigazione basati sul meteo.",
+        "delete_plant": "Elimina",
+        "confirm_delete_title": "Elimina pianta",
+        "confirm_delete_body": "Sei sicuro di voler eliminare questa pianta? Le letture resteranno salvate.",
+        "confirm_delete_cancel": "Annulla",
+        "confirm_delete_confirm": "Sì, elimina"
     }
 }

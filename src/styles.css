@@ -12,6 +12,10 @@
     --hp-soft-bg: #f7fbfd;
 }
 
+.text-2xs {
+    font-size: 9px;
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
         --bg: #0b1220;
@@ -59,7 +63,6 @@ section {
 
 header {
     display: flex;
-    align-items: center;
     gap: 12px;
     margin-bottom: 32px;
     flex-direction: column;
@@ -253,6 +256,16 @@ body.modal-open {
     &:hover {
         color: var(--accent);
     }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity .15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
 .modal-content form {
@@ -534,6 +547,23 @@ input.hp-slider:active::-moz-range-thumb {
     outline: none;
     border-color: var(--hp-primary);
     box-shadow: 0 0 0 3px rgba(71, 184, 219, 0.2);
+}
+
+#add-plant-btn {
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+#add-plant-btn .fa-plus {
+    transform: translate(1px, -8px);
+    position: absolute;
+    top: 7px;
+    right: 0px;
+    background: #0f172a;
+    padding: 0 3px;
+    height: 10px;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 /* Species autocomplete combo */

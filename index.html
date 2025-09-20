@@ -41,15 +41,12 @@
 </head>
 
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100">
-    <div id="app" class="max-w-4xl mx-auto px-4 py-6">
+    <div id="app" class="max-w-4xl mx-auto px-4 py-6 pb-40 md:pb-6">
         <!-- Header -->
-        <header class="flex items-center gap-4 mb-6 relative">
+        <header class="flex flex-row gap-4 mb-6 relative">
             <div class="shrink-0 w-12 h-12">
                 <img class="w-full h-full object-contain" src="./assets/img/happy-plants-logo.png"
                     alt="Happy plants logo" />
-            </div>
-            <div>
-                <h1 class="text-2xl font-semibold" v-text="t('app_title')"></h1>
             </div>
             <div class="ml-auto flex items-center gap-2">
                 <select aria-label="Language" v-model="locale"
@@ -65,173 +62,7 @@
             </div>
         </header>
 
-        <!-- Weather section -->
-        <section id="weather"
-            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden mb-6 p-4">
-            <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                <span>Location:</span>
-                <span class="font-medium" v-text="weather.location || weather.city"></span>
-            </div>
-            <div class="mt-2" v-if="weather.today">
-                <div class="flex flex-col md:flex-row md:items-center gap-4">
-                    <div class="flex items-center gap-3 min-w-[220px]">
-                        <i :class="weather.today.icon" class="text-2xl"></i>
-                        <div class="text-sm">
-                            <div class="font-medium">Today</div>
-                            <div class="text-slate-600 dark:text-slate-300">
-                                <span v-if="weather.today.tempMax != null">{{ Math.round(weather.today.tempMax)
-                                    }}°C</span>
-                                <span v-if="weather.today.precipSum != null"> · {{
-                                    Number(weather.today.precipSum).toFixed(1) }}mm</span>
-                                <span v-if="weather.today.precipProb != null"> · {{ Math.round(weather.today.precipProb)
-                                    }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-start gap-1">
-                        <div class="flex items-start gap-2">
-                            <span aria-label="watering level" class="inline-flex items-center gap-1">
-                                <i v-for="n in 3" :key="n" class="fas fa-tint"
-                                    :class="n <= weather.today.level ? 'text-sky-600' : 'text-slate-300 dark:text-slate-600'"></i>
-                            </span>
-                            <span class="text-sm" :class="[
-                                weather.today.level === 1 ? 'text-emerald-600' : '',
-                                weather.today.level === 2 ? 'text-amber-600' : '',
-                                weather.today.level === 3 ? 'text-orange-600' : ''
-                            ]">
-                                {{
-                                weather.today.level === 1 ? 'Light watering' :
-                                weather.today.level === 2 ? 'Moderate watering' :
-                                weather.today.level === 3 ? 'Heavy watering' : 'Unknown' }}
-                            </span>
-                        </div>
-                        <span class="text-xs text-slate-400 mt-1" v-if="weather.today.reason">{{ weather.today.reason
-                            }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4" v-if="weather.next && weather.next.length">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Forecast (next 2 days)</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div v-for="(d,i) in weather.next" :key="d.date"
-                        class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-700/40">
-                        <i :class="d.icon" class="text-xl"></i>
-                        <div class="text-sm">
-                            <div class="font-medium">{{ d.date }}</div>
-                            <div class="text-slate-600 dark:text-slate-300">
-                                <span v-if="d.tempMax != null">{{ Math.round(d.tempMax) }}°C</span>
-                                <span v-if="d.precipSum != null"> · {{ Number(d.precipSum).toFixed(1) }}mm</span>
-                                <span v-if="d.precipProb != null"> · {{ Math.round(d.precipProb) }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-2 text-xs text-slate-500 dark:text-slate-400" v-if="weather.error">{{ weather.error }}</div>
-        </section>
-
-        <!-- Quick add a new plant instance -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4 mb-6">
-            <div class="grid gap-4 md:grid-cols-3 relative">
-                <div class="md:col-span-2">
-                    <label for="species-name-input" class="block text-sm font-medium text-slate-400 mb-1"
-                        v-text="t('species_label')"></label>
-                    <div class="relative">
-                        <input type="text" id="species-name-input" :placeholder="t('placeholder_species')"
-                            v-model.trim="newPlantForm.species_name"
-                            class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
-                        <div class="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow z-10 max-h-56 overflow-auto"
-                            v-if="newPlantForm.species_name && newPlantForm.species_name.length >= 2 && speciesSuggestions.length">
-                            <div class="px-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60"
-                                v-for="s in speciesSuggestions" :key="s.id"
-                                @click="newPlantForm.species_name = s.common_name; speciesSuggestions = []">
-                                <div class="font-medium">{{ tSpecies(s.common_name) }}</div>
-                                <div class="text-xs text-slate-500 dark:text-slate-400" v-if="s.scientific_name">{{
-                                    s.scientific_name }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-sm text-red-500 dark:text-red-400 mt-1" v-if="speciesError">{{ speciesError }}</p>
-                </div>
-                <div class="md:col-span-1">
-                    <label for="new-plant-label-input" class="block text-sm font-medium text-slate-400 mb-1"
-                        v-text="t('label_label')"></label>
-                    <input id="new-plant-label-input" type="text" :placeholder="t('placeholder_label')"
-                        v-model.trim="newPlantForm.label"
-                        class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
-                </div>
-            </div>
-            <div class="mt-4">
-                <button @click="addUserPlant" v-text="t('add_plant_btn')"
-                    class="inline-flex items-center gap-2 rounded-md bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">
-                    <i class="fas fa-plus mr-1"></i>
-                </button>
-            </div>
-        </div>
-
-        <section id="chart-section" class="mb-6">
-
-            <!-- Select a user plant instance -->
-            <div id="plant-selection" class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
-                <div class="w-full md:w-auto">
-                    <label for="plantDropdown" class="block text-sm font-medium text-slate-400 mb-1"
-                        v-text="t('select_plant_label')"></label>
-                    <select id="plantDropdown" v-model="selectedUserPlantId" @change="onPlantChange"
-                        class="w-full md:w-64 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2">
-                        <option value="">--Choose a Plant--</option>
-                        <option v-for="p in userPlants" :key="p.id" :value="String(p.id)">{{ p.label }} ({{
-                            tSpecies(p.species) }})</option>
-                    </select>
-                </div>
-                <div>
-                    <button id="addReadingBtn" :disabled="!authed" @click="openAddModal" v-text="t('add_reading_btn')"
-                        class="inline-flex items-center gap-2 rounded-md bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fas fa-plus mr-1"></i>
-                    </button>
-                </div>
-            </div>
-
-
-            <div class="flex items-center gap-6 mb-4 text-sm text-slate-700 dark:text-slate-200">
-                <label class="inline-flex items-center gap-2">
-                    <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="ph"
-                        v-model="dataType" @change="onTypeChange">
-                    {{ t('dataType_ph') }}
-                </label>
-                <label class="inline-flex items-center gap-2">
-                    <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="moisture"
-                        v-model="dataType" @change="onTypeChange">
-                    {{ t('dataType_moisture') }}
-                </label>
-                <label class="inline-flex items-center gap-2">
-                    <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="fertility"
-                        v-model="dataType" @change="onTypeChange">
-                    {{ t('dataType_fertility') }}
-                </label>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4">
-                <div v-if="!chartData.length" class="text-slate-500 dark:text-slate-400 text-center py-12">No data
-                    available for the selected plant.</div>
-                <canvas id="plants-chart" width="600" height="400" v-else class="w-full"></canvas>
-            </div>
-        </section>
-        <!-- <section id="notes-section"
-            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4">
-            <p class="font-medium mb-2" v-text="t('notes_title')"></p>
-            <ul class="space-y-2 mb-4">
-                <li class="text-slate-700 dark:text-slate-200"><i class="fas fa-leaf text-emerald-600"></i> {{ t('notes_li_1') }}</li>
-                <li class="text-slate-700 dark:text-slate-200"><i class="fas fa-seedling text-emerald-600"></i> {{ t('notes_li_2') }}</li>
-                <li class="text-slate-700 dark:text-slate-200"><img class="inline w-4 h-4 align-text-bottom" src="./assets/img/icons/grass-icon.svg" alt=""> {{ t('notes_li_3') }}</li>
-                <li class="text-slate-700 dark:text-slate-200"><img class="inline w-4 h-4 align-text-bottom" src="./assets/img/icons/tomato-icon.svg" alt=""> {{ t('notes_li_4') }}</li>
-            </ul>
-            <ul class="space-y-2 text-slate-700 dark:text-slate-200">
-                <li>{{ t('notes_li_5') }}</li>
-                <li><i class="fas fa-sun text-yellow-500"></i> {{ t('notes_li_6') }}</li>
-                <li><i class="fas fa-moon"></i> {{ t('notes_li_7') }}</li>
-            </ul>
-    </section>
-        <!-- Modals controlled by Vue -->
-        <!-- Auth Modal -->
+        <!-- Auth Modal (moved outside authed wrapper so it works while logged out) -->
         <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showAuthModal">
             <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-xl shadow-xl">
                 <button
@@ -280,7 +111,8 @@
                             <label class="block text-sm font-medium text-slate-400">City (for weather)
                                 <input type="text" v-model.trim="registerForm.city" placeholder="e.g., Utrecht"
                                     class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
-                                <span class="text-xs text-slate-500">Defaults to Utrecht, Netherlands if empty.</span>
+                                <span class="text-xs text-slate-500">Defaults to Utrecht, Netherlands if
+                                    empty.</span>
                             </label>
                             <button type="submit"
                                 class="w-full rounded-md bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">Create
@@ -291,72 +123,307 @@
             </div>
         </div>
 
-        <!-- Add Reading Modal -->
-        <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showAddModal">
-            <div class="relative bg-white dark:bg-slate-800 w-full max-w-xl rounded-xl shadow-xl">
-                <button
-                    class="z-10 absolute top-3 right-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                    @click="closeModals"><i class="fas fa-times"></i></button>
-                <div class="p-6">
-                    <form class="flex gap-6 flex-col" @submit.prevent="saveReading">
-                        <div>
-                            <p class="block text-sm font-medium text-slate-500 mb-2" v-text="t('modal_select_plant')">
-                            </p>
-                            <div class="flex items-center gap-2">
-                                <button type="button" @click="goPrevPlant" :disabled="!userPlants.length"
-                                    class="h-10 w-10 flex items-center justify-center rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"><i
-                                        class="text-sm fas fa-chevron-left"></i></button>
-                                <select id="plant" v-model="addForm.user_plant_id" required
-                                    class="flex-1 h-10 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3">
-                                    <option v-for="p in userPlants" :key="p.id" :value="String(p.id)">{{ p.label }} ({{
-                                        tSpecies(p.species) }})</option>
-                                </select>
-                                <button type="button" @click="goNextPlant" :disabled="!userPlants.length"
-                                    class="h-10 w-10 flex items-center justify-center rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"><i
-                                        class="text-sm fas fa-chevron-right"></i></button>
-                            </div>
-                            <ul v-if="currentPlantSuggestions.length"
-                                class="mt-4 space-y-1 text-xs text-slate-600 dark:text-slate-300 list-disc pl-4">
-                                <li v-for="(sug,i) in currentPlantSuggestions" :key="i">{{ sug }}</li>
-                            </ul>
-                        </div>
-                        <div class="grid gap-6 md:grid-cols-3">
-                            <div class="block text-sm font-medium text-slate-500">
-                                <div class="flex justify-between items-center mb-1"><span>{{ t('ph_level')
-                                        }}</span><span class="text-xs" v-if="addForm.ph != null">{{
-                                        Number(addForm.ph).toFixed(1) }}</span></div>
-                                <input type="range" min="3" max="10" step="0.1" v-model.number="addForm.ph"
-                                    aria-label="pH level" class="w-full hp-slider" :style="phSliderStyle" />
-                            </div>
-                            <div class="block text-sm font-medium text-slate-500">
-                                <div class="flex justify-between items-center mb-1"><span>{{ t('moisture_level')
-                                        }}</span><span class="text-xs" v-if="addForm.moisture != null">{{
-                                        addForm.moisture }}%</span></div>
-                                <input type="range" min="0" max="100" step="1" v-model.number="addForm.moisture"
-                                    aria-label="Moisture level" class="w-full hp-slider" :style="moistureSliderStyle" />
-                            </div>
-                            <div class="block text-sm font-medium text-slate-500">
-                                {{ t('fertility_label') }}
-                                <div class="mt-2 flex items-center gap-3">
-                                    <button type="button" @click="addForm.fertility = 0"
-                                        :class="addForm.fertility === 0 ? 'opacity-100 ring-2 ring-red-500' : 'opacity-60'"
-                                        class="h-10 w-10 rounded-full border border-red-500 text-red-500 flex items-center justify-center transition-opacity bg-transparent"><i
-                                            class="fas fa-signal"></i></button>
-                                    <button type="button" @click="addForm.fertility = 1"
-                                        :class="addForm.fertility === 1 ? 'opacity-100 ring-2 ring-yellow-400' : 'opacity-60'"
-                                        class="h-10 w-10 rounded-full border border-yellow-400 text-yellow-400 flex items-center justify-center transition-opacity bg-transparent"><i
-                                            class="fas fa-signal"></i></button>
-                                    <button type="button" @click="addForm.fertility = 2"
-                                        :class="addForm.fertility === 2 ? 'opacity-100 ring-2 ring-green-500' : 'opacity-60'"
-                                        class="h-10 w-10 rounded-full border border-green-500 text-green-500 flex items-center justify-center transition-opacity bg-transparent"><i
-                                            class="fas fa-signal"></i></button>
+        <!-- Public landing when not authenticated -->
+        <section v-if="!authed" class="mb-10 text-center space-y-6">
+            <h1 class="text-3xl font-bold tracking-tight">Happy Plants</h1>
+            <p class="max-w-xl mx-auto text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                <span v-if="!translationsReady"
+                    class="inline-block animate-pulse bg-slate-200 dark:bg-slate-700 h-4 rounded w-3/4"></span>
+                <span v-else v-text="t('app_description')"></span>
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button @click="showAuthModal = true; authTab='login'"
+                    class="px-5 py-2 rounded-md bg-sky-600 text-white text-sm font-medium hover:bg-sky-700">Login</button>
+                <button @click="showAuthModal = true; authTab='register'"
+                    class="px-5 py-2 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600">Register</button>
+            </div>
+        </section>
+
+        <div v-if="authed" id="hp-auth-wrapper" class="space-y-6">
+            <!-- Weather section -->
+            <section id="weather"
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden mb-6 p-4">
+                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <span>Location:</span>
+                    <span class="font-medium" v-text="weather.location || weather.city"></span>
+                </div>
+                <div class="mt-2" v-if="weather.today">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+                        <div class="flex items-center gap-3 min-w-[220px]">
+                            <i :class="weather.today.icon" class="text-2xl"></i>
+                            <div class="text-sm">
+                                <div class="font-medium">Today</div>
+                                <div class="text-slate-600 dark:text-slate-300">
+                                    <span v-if="weather.today.tempMax != null">{{ Math.round(weather.today.tempMax)
+                                        }}°C</span>
+                                    <span v-if="weather.today.precipSum != null"> · {{
+                                        Number(weather.today.precipSum).toFixed(1) }}mm</span>
+                                    <span v-if="weather.today.precipProb != null"> · {{
+                                        Math.round(weather.today.precipProb)
+                                        }}%</span>
                                 </div>
                             </div>
                         </div>
-                        <button type="submit"
-                            class="w-full rounded-md bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700"
-                            v-text="t('save_reading_continue')"></button>
-                    </form>
+                        <div class="flex flex-col items-start gap-1">
+                            <div class="flex flex-col gap-2">
+                                <span aria-label="watering level" class="inline-flex items-center gap-1">
+                                    <i v-for="n in 3" :key="n" class="fas fa-tint"
+                                        :class="n <= weather.today.level ? 'text-sky-600' : 'text-slate-300 dark:text-slate-600'"></i>
+                                </span>
+                                <span class="text-sm" :class="[
+                                weather.today.level === 1 ? 'text-emerald-600' : '',
+                                weather.today.level === 2 ? 'text-amber-600' : '',
+                                weather.today.level === 3 ? 'text-orange-600' : ''
+                            ]">
+                                    {{
+                                    weather.today.level === 1 ? 'Light watering' :
+                                    weather.today.level === 2 ? 'Moderate watering' :
+                                    weather.today.level === 3 ? 'Heavy watering' : 'Unknown' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4" v-if="weather.next && weather.next.length">
+                    <button type="button" @click="forecastOpen = !forecastOpen"
+                        class="w-full flex items-center justify-between text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                        <span>Forecast (next 2 days)</span>
+                        <i :class="forecastOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                    </button>
+                    <div v-show="forecastOpen" class="mt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div v-for="(d,i) in weather.next" :key="d.date"
+                                class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-700/40">
+                                <i :class="d.icon" class="text-xl"></i>
+                                <div class="text-sm">
+                                    <div class="font-medium">{{ d.date }}</div>
+                                    <div class="text-slate-600 dark:text-slate-300">
+                                        <span v-if="d.tempMax != null">{{ Math.round(d.tempMax) }}°C</span>
+                                        <span v-if="d.precipSum != null"> · {{ Number(d.precipSum).toFixed(1)
+                                            }}mm</span>
+                                        <span v-if="d.precipProb != null"> · {{ Math.round(d.precipProb) }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 dark:text-slate-400" v-if="weather.error">{{ weather.error }}
+                </div>
+            </section>
+
+            <!-- Quick add moved to modal trigger -->
+            <section id="chart-section" class="mb-6">
+                <!-- Select a user plant instance -->
+                <div id="plant-selection" class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
+                    <div class="w-full md:w-auto">
+                        <label for="plantDropdown" class="block text-sm font-medium text-slate-400 mb-1"
+                            v-text="t('select_plant_label')"></label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="goPrevPlant" :disabled="!userPlants.length"
+                                class="h-10 w-10 flex items-center justify-center rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"><i
+                                    class="text-sm fas fa-chevron-left"></i></button>
+                            <select id="plant" v-model="addForm.user_plant_id" required
+                                class="flex-1 h-10 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3">
+                                <option v-for="p in userPlants" :key="p.id" :value="String(p.id)">{{ p.label }} ({{
+                                    tSpecies(p.species) }})</option>
+                            </select>
+                            <button type="button" @click="goNextPlant" :disabled="!userPlants.length"
+                                class="h-10 w-10 flex items-center justify-center rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"><i
+                                    class="text-sm fas fa-chevron-right"></i></button>
+                            <!-- Delete Plant Button -->
+                            <button id="delete-plant-btn" type="button" @click="requestDeleteCurrentPlant"
+                                :disabled="!userPlants.length"
+                                class="relative h-10 w-10 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-40"
+                                :title="t('delete_plant')" aria-label="Delete plant">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button id="add-plant-btn" type="button" @click="openQuickAddModal"
+                                class="relative bg-gray-500/10 h-10 w-10 flex items-center justify-center rounded-md text-white hover:bg-sky-700 transition-colors"
+                                :title="t('add_plant_btn')" aria-label="Add plant">
+                                <i class="fas fa-seedling"></i>
+                                <i class="fas fa-plus text-[10px] absolute top-1.5 right-1.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Chart and data type selection -->
+                <div class="flex items-center gap-6 mb-4 text-sm text-slate-700 dark:text-slate-200">
+                    <label class="inline-flex items-center gap-2">
+                        <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="ph"
+                            v-model="dataType" @change="onTypeChange">
+                        {{ t('dataType_ph') }}
+                    </label>
+                    <label class="inline-flex items-center gap-2">
+                        <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="moisture"
+                            v-model="dataType" @change="onTypeChange">
+                        {{ t('dataType_moisture') }}
+                    </label>
+                    <label class="inline-flex items-center gap-2">
+                        <input type="radio" name="dataType" class="text-sky-600 focus:ring-sky-600" value="fertility"
+                            v-model="dataType" @change="onTypeChange">
+                        {{ t('dataType_fertility') }}
+                    </label>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4">
+                    <div v-if="!chartData.length" class="text-slate-500 dark:text-slate-400 text-center py-12">No data
+                        available for the selected plant.</div>
+                    <canvas id="plants-chart" width="600" height="400" v-else class="w-full"></canvas>
+                </div>
+            </section>
+            <!-- Bottom bar with floating add button 90% width greyish semi transparent-->
+            <div id="bottom-bar"
+                class="fixed z-40 bottom-2 md:bottom-8 left-1/2 -translate-x-1/2 transform bg-gray-500/10 w-11/12 max-w-4xl px-4 py-4 rounded-full backdrop-blur-sm">
+                <div class="flex flex-col justify-center gap-1 items-center">
+                    <!-- Floating Add Reading Button -->
+                    <button id="addReadingBtn" :disabled="!authed" @click="openAddModal" :title="t('add_reading_btn')"
+                        :aria-label="t('add_reading_btn')"
+                        class="w-8 h-8 rounded-full bg-red-300 dark:bg-red-400 text-slate-800 dark:text-white shadow-lg shadow-red-300/40 dark:shadow-red-500/30 hover:bg-red-400 dark:hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-200 dark:focus:ring-red-600 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <i class="fas fa-plus text-sm"></i>
+                    </button>
+                    <!-- small text below the button -->
+                    <label class="text-xs text-slate-500 dark:text-slate-400" for="addReadingBtn">{{
+                        t('add_reading_btn')}}</label>
+                </div>
+            </div>
+
+
+            <!-- Add Reading Modal -->
+            <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showAddModal">
+                <div class="relative bg-white dark:bg-slate-800 w-full max-w-xl rounded-xl shadow-xl">
+                    <button
+                        class="z-10 absolute top-3 right-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        @click="closeModals"><i class="fas fa-times"></i></button>
+                    <div class="p-6">
+                        <form class="flex gap-6 flex-col" @submit.prevent="saveReading">
+                            <div>
+                                <p class="block text-sm font-medium text-slate-500 mb-2"
+                                    v-text="t('modal_select_plant')">
+                                </p>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="goPrevPlant" :disabled="!userPlants.length"
+                                        class="h-10 w-10 flex items-center justify-center rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"><i
+                                            class="text-sm fas fa-chevron-left"></i></button>
+                                    <select id="plant" v-model="addForm.user_plant_id" required
+                                        class="flex-1 h-10 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3">
+                                        <option v-for="p in userPlants" :key="p.id" :value="String(p.id)">{{ p.label }}
+                                            ({{
+                                            tSpecies(p.species) }})</option>
+                                    </select>
+                                    <button type="button" @click="goNextPlant" :disabled="!userPlants.length"
+                                        class="h-10 w-10 flex items-center justify-center rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"><i
+                                            class="text-sm fas fa-chevron-right"></i></button>
+                                </div>
+                                <ul v-if="currentPlantSuggestions.length"
+                                    class="mt-4 space-y-1 text-xs text-slate-600 dark:text-slate-300 list-disc pl-4">
+                                    <li v-for="(sug,i) in currentPlantSuggestions" :key="i">{{ sug }}</li>
+                                </ul>
+                            </div>
+                            <div class="grid gap-6 md:grid-cols-3">
+                                <div class="block text-sm font-medium text-slate-500">
+                                    <div class="flex justify-between items-center mb-1"><span>{{ t('ph_level')
+                                            }}</span><span class="text-xs" v-if="addForm.ph != null">{{
+                                            Number(addForm.ph).toFixed(1) }}</span></div>
+                                    <input type="range" min="3" max="10" step="0.1" v-model.number="addForm.ph"
+                                        aria-label="pH level" class="w-full hp-slider" :style="phSliderStyle" />
+                                </div>
+                                <div class="block text-sm font-medium text-slate-500">
+                                    <div class="flex justify-between items-center mb-1"><span>{{ t('moisture_level')
+                                            }}</span><span class="text-xs" v-if="addForm.moisture != null">{{
+                                            addForm.moisture }}%</span></div>
+                                    <input type="range" min="0" max="100" step="1" v-model.number="addForm.moisture"
+                                        aria-label="Moisture level" class="w-full hp-slider"
+                                        :style="moistureSliderStyle" />
+                                </div>
+                                <div class="block text-sm font-medium text-slate-500">
+                                    {{ t('fertility_label') }}
+                                    <div class="mt-2 flex items-center gap-3">
+                                        <button type="button" @click="addForm.fertility = 0"
+                                            :class="addForm.fertility === 0 ? 'opacity-100 ring-2 ring-red-500' : 'opacity-60'"
+                                            class="h-10 w-10 rounded-full border border-red-500 text-red-500 flex items-center justify-center transition-opacity bg-transparent"><i
+                                                class="fas fa-signal"></i></button>
+                                        <button type="button" @click="addForm.fertility = 1"
+                                            :class="addForm.fertility === 1 ? 'opacity-100 ring-2 ring-yellow-400' : 'opacity-60'"
+                                            class="h-10 w-10 rounded-full border border-yellow-400 text-yellow-400 flex items-center justify-center transition-opacity bg-transparent"><i
+                                                class="fas fa-signal"></i></button>
+                                        <button type="button" @click="addForm.fertility = 2"
+                                            :class="addForm.fertility === 2 ? 'opacity-100 ring-2 ring-green-500' : 'opacity-60'"
+                                            class="h-10 w-10 rounded-full border border-green-500 text-green-500 flex items-center justify-center transition-opacity bg-transparent"><i
+                                                class="fas fa-signal"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit"
+                                class="w-full rounded-md bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700"
+                                v-text="t('save_reading_continue')"></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Add Plant Modal -->
+            <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showQuickAddModal">
+                <div class="relative bg-white dark:bg-slate-800 w-full max-w-xl rounded-xl shadow-xl">
+                    <button
+                        class="z-10 absolute top-3 right-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        @click="closeModals"><i class="fas fa-times"></i></button>
+                    <div class="p-6">
+                        <h2 class="text-lg font-semibold mb-4" v-text="t('add_plant_btn')"></h2>
+                        <div class="grid gap-4 md:grid-cols-3">
+                            <div class="md:col-span-2">
+                                <label for="species-name-input" class="block text-sm font-medium text-slate-400 mb-1"
+                                    v-text="t('species_label')"></label>
+                                <div class="relative">
+                                    <input type="text" id="species-name-input" :placeholder="t('placeholder_species')"
+                                        v-model.trim="newPlantForm.species_name"
+                                        class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
+                                    <div class="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow z-10 max-h-56 overflow-auto"
+                                        v-if="newPlantForm.species_name && newPlantForm.species_name.length >= 2 && speciesSuggestions.length">
+                                        <div class="px-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60"
+                                            v-for="s in speciesSuggestions" :key="s.id"
+                                            @click="newPlantForm.species_name = s.common_name; speciesSuggestions = []">
+                                            <div class="font-medium">{{ tSpecies(s.common_name) }}</div>
+                                            <div class="text-xs text-slate-500 dark:text-slate-400"
+                                                v-if="s.scientific_name">{{
+                                                s.scientific_name }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-red-500 dark:text-red-400 mt-1" v-if="speciesError">{{
+                                    speciesError
+                                    }}</p>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label for="new-plant-label-input" class="block text-sm font-medium text-slate-400 mb-1"
+                                    v-text="t('label_label')"></label>
+                                <input id="new-plant-label-input" type="text" :placeholder="t('placeholder_label')"
+                                    v-model.trim="newPlantForm.label"
+                                    class="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500 dark:focus:border-sky-400 dark:focus:ring-sky-400 px-3 py-2" />
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button @click="addUserPlant" v-text="t('add_plant_btn')"
+                                class="inline-flex items-center gap-2 rounded-md bg-sky-600 text-white px-5 py-2 hover:bg-sky-700">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- end hp-auth-wrapper -->
+        <!-- Delete Plant Confirm Modal -->
+        <div class="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center" v-if="showDeletePlantModal">
+            <div class="relative bg-white dark:bg-slate-800 w-full max-w-sm rounded-lg shadow-xl p-6">
+                <h2 class="text-lg font-semibold mb-2" v-text="t('confirm_delete_title')"></h2>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-4" v-text="t('confirm_delete_body')"></p>
+                <div class="flex justify-end gap-3">
+                    <button @click="cancelDeletePlant"
+                        class="px-4 py-2 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm hover:bg-slate-300 dark:hover:bg-slate-600"
+                        v-text="t('confirm_delete_cancel')"></button>
+                    <button @click="confirmDeletePlant"
+                        class="px-4 py-2 rounded-md bg-red-600 text-white text-sm hover:bg-red-700"
+                        v-text="t('confirm_delete_confirm')"></button>
                 </div>
             </div>
         </div>

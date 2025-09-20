@@ -1,8 +1,8 @@
 import { drawChart } from './chart.js';
 import { fetchReadings } from './api/readings.js';
-import { fetchSpecies, fetchUserPlants, createUserPlant, createSpeciesByName, searchSpecies, fetchThresholdsByUserPlant } from './api/plants.js';
+import { fetchSpecies, fetchUserPlants, createUserPlant, createSpeciesByName, searchSpecies, fetchThresholdsByUserPlant, deleteUserPlant } from './api/plants.js';
 import { showNotification } from './notifications.js';
-import { loadSpeciesTranslations, loadUiTranslations, tSpecies, t, setLocale } from './i18n/index.js';
+import { loadSpeciesTranslations, loadUiTranslations, tSpecies, t, setLocale, reloadAllTranslations } from './i18n/index.js';
 import { plantSuggestions, getPlantSuggestions, computeSliderStyle } from './plant-suggestions.js';
 import { getWaterSuggestion } from './api/weather.js';
 
@@ -16,7 +16,9 @@ createApp({
         const authTitle = computed(() => (authed.value ? 'Sign out' : 'Sign in'));
         const showAuthModal = ref(false);
         const showAddModal = ref(false);
+        const showQuickAddModal = ref(false);
         const authTab = ref('login');
+        const showDeletePlantModal = ref(false);
 
         const loginForm = ref({ identifier: '', password: '' });
         const registerForm = ref({ email: '', username: '', password: '', city: '' });
@@ -36,6 +38,8 @@ createApp({
         const chartData = ref([]);
         const thresholds = ref(null);
         const weather = ref({ city: 'Utrecht', location: '', today: null, next: [], error: '' });
+        const forecastOpen = ref(false);
+        const translationsReady = ref(false);
 
         const currentSpeciesCommon = computed(() => {
             const up = userPlants.value.find(p => String(p.id) === String(addForm.value.user_plant_id));
@@ -110,6 +114,7 @@ createApp({
         function closeModals() {
             showAuthModal.value = false;
             showAddModal.value = false;
+            showQuickAddModal.value = false;
         }
 
         async function login() {
@@ -157,14 +162,45 @@ createApp({
         }
 
         function openAddModal() {
-            if (!authed.value) {
-                notify('Please sign in to add a reading');
-                showAuthModal.value = true;
-                return;
-            }
             addForm.value.user_plant_id = selectedUserPlantId.value || (userPlants.value[0]?.id || '');
             showAddModal.value = true;
         }
+
+        function openQuickAddModal() {
+            showQuickAddModal.value = true;
+        }
+
+        function requestDeleteCurrentPlant() {
+            if (!selectedUserPlantId.value) return;
+            showDeletePlantModal.value = true;
+        }
+
+        async function confirmDeletePlant() {
+            const id = selectedUserPlantId.value;
+            if (!id) { showDeletePlantModal.value = false; return; }
+            const res = await deleteUserPlant(id);
+            if (res.status === 'success') {
+                // Remove locally
+                userPlants.value = userPlants.value.filter(p => String(p.id) !== String(id));
+                if (userPlants.value.length) {
+                    selectedUserPlantId.value = String(userPlants.value[0].id);
+                    addForm.value.user_plant_id = selectedUserPlantId.value;
+                } else {
+                    selectedUserPlantId.value = '';
+                    addForm.value.user_plant_id = '';
+                    chartData.value = [];
+                    thresholds.value = null;
+                    if (window.plantsChartInstance) { try { window.plantsChartInstance.destroy(); } catch { } window.plantsChartInstance = null; }
+                }
+                notify(t('delete_plant') + ' OK');
+            } else {
+                notify('Error deleting');
+            }
+            showDeletePlantModal.value = false;
+            render();
+        }
+
+        function cancelDeletePlant() { showDeletePlantModal.value = false; }
 
         async function saveReading() {
             try {
@@ -218,12 +254,26 @@ createApp({
                 // Preload empty to warm endpoint (optional)
                 species.value = await fetchSpecies();
                 userPlants.value = await fetchUserPlants();
-                if (!selectedUserPlantId.value && userPlants.value.length) {
-                    selectedUserPlantId.value = String(userPlants.value[0].id);
+                // Normalize and validate current selection
+                const ids = userPlants.value.map(p => String(p.id));
+                let changed = false;
+                if (!selectedUserPlantId.value || !ids.includes(String(selectedUserPlantId.value))) {
+                    // pick first available or clear
+                    selectedUserPlantId.value = ids[0] || '';
+                    changed = true;
+                }
+                // Sync addForm selection
+                if (!addForm.value.user_plant_id || !ids.includes(String(addForm.value.user_plant_id))) {
+                    addForm.value.user_plant_id = selectedUserPlantId.value || '';
+                    changed = true;
                 }
                 // Load translations lazily
                 speciesLocaleMap.value = await loadSpeciesTranslations(locale.value);
                 uiMap.value = await loadUiTranslations(locale.value);
+                if (changed) {
+                    // Re-render thresholds + chart for new selection
+                    await render();
+                }
             } catch { }
         }
 
@@ -238,7 +288,7 @@ createApp({
                 speciesSuggestions.value = suggestions;
                 const exact = suggestions.find(s => s.common_name.toLowerCase() === speciesName.toLowerCase() || (s.scientific_name && s.scientific_name.toLowerCase() === speciesName.toLowerCase()));
                 if (!exact) {
-                    speciesError.value = 'Please select one of the suggested options';
+                    speciesError.value = t('species_suggestion_error');
                     return;
                 }
                 speciesError.value = '';
@@ -256,18 +306,70 @@ createApp({
                 newPlantForm.value.species_name = '';
                 newPlantForm.value.label = '';
                 await render();
+                // Close quick add modal after successful creation
+                showQuickAddModal.value = false;
             } else {
                 notify('Error creating plant');
             }
         }
 
-        // Live species suggestions when typing
+        // Live species suggestions when typing (supports localized substring search)
+        let lastSpeciesQueryId = 0;
         watch(() => newPlantForm.value.species_name, async (val) => {
             speciesError.value = '';
-            if ((val || '').length >= 2) {
-                speciesSuggestions.value = await searchSpecies(val);
-            } else {
+            const q = (val || '').trim();
+            if (q.length < 2) {
                 speciesSuggestions.value = [];
+                return;
+            }
+            const queryId = ++lastSpeciesQueryId;
+            try {
+                // 1. Start with backend search (likely English canonical names)
+                const base = await searchSpecies(q);
+                if (queryId !== lastSpeciesQueryId) return; // race guard
+                const byName = new Map();
+                base.forEach(s => byName.set(s.common_name.toLowerCase(), s));
+
+                // 2. Localized enrichment: if current locale isn't English, search translated names
+                if (locale.value !== 'en' && speciesLocaleMap.value) {
+                    const qLower = q.toLowerCase();
+                    const englishToLocal = speciesLocaleMap.value; // { EnglishName: LocalizedName }
+                    // Collect english names whose localized OR english form includes query
+                    const englishMatches = [];
+                    for (const [eng, loc] of Object.entries(englishToLocal)) {
+                        if (!eng) continue;
+                        const locLower = (loc || '').toLowerCase();
+                        const engLower = eng.toLowerCase();
+                        if (locLower.includes(qLower) || engLower.includes(qLower)) {
+                            if (!byName.has(engLower)) {
+                                englishMatches.push(eng);
+                            }
+                        }
+                    }
+                    // Limit extra fetches to avoid overload
+                    const limited = englishMatches.slice(0, 6);
+                    if (limited.length) {
+                        // Fetch each english name to get consistent shape (id, scientific_name, etc.)
+                        const fetched = await Promise.all(limited.map(name => searchSpecies(name).catch(() => [])));
+                        if (queryId !== lastSpeciesQueryId) return; // race guard after awaits
+                        fetched.flat().forEach(item => {
+                            const key = item.common_name?.toLowerCase();
+                            if (key && !byName.has(key)) {
+                                byName.set(key, item);
+                            }
+                        });
+                    }
+                }
+
+                // 3. Update list preserving original backend order followed by localized additions
+                const merged = [];
+                base.forEach(s => merged.push(s));
+                byName.forEach((s, k) => {
+                    if (!base.find(b => b.common_name === s.common_name)) merged.push(s);
+                });
+                speciesSuggestions.value = merged;
+            } catch {
+                if (queryId === lastSpeciesQueryId) speciesSuggestions.value = [];
             }
         });
 
@@ -324,6 +426,19 @@ createApp({
             uiMap.value = await loadUiTranslations(newLoc);
             // expose for non-vue modules (chart.js)
             window.__hp_t = t;
+            translationsReady.value = true;
+        }
+
+        // Force reload translations without full page refresh (e.g. after editing ui.json during dev)
+        async function reloadTranslations() {
+            const current = locale.value || 'en';
+            const { ui, species } = await reloadAllTranslations(current);
+            uiMap.value = ui;
+            speciesLocaleMap.value = species;
+            // Ensure locale still set
+            setLocale(current);
+            window.__hp_t = t;
+            translationsReady.value = true;
         }
 
         // React to user changing locale from select (ref is auto-unwrapped in template)
@@ -343,8 +458,8 @@ createApp({
         });
 
         // Keep body scroll locked when any modal is open
-        watch([showAuthModal, showAddModal], ([a, b]) => {
-            const open = !!(a || b);
+        watch([showAuthModal, showAddModal, showQuickAddModal, showDeletePlantModal], ([a, b, c, d]) => {
+            const open = !!(a || b || c || d);
             document.body.classList.toggle('modal-open', open);
         });
 
@@ -353,6 +468,7 @@ createApp({
             authTitle,
             showAuthModal,
             showAddModal,
+            showQuickAddModal,
             authTab,
             loginForm,
             registerForm,
@@ -369,6 +485,7 @@ createApp({
             onPlantChange,
             onTypeChange,
             openAddModal,
+            openQuickAddModal,
             addForm,
             newPlantForm,
             addUserPlant,
@@ -389,7 +506,17 @@ createApp({
             refreshWeather,
             t,
             uiMap,
-            changeLocale
+            changeLocale,
+            forecastOpen,
+            translationsReady
+            , reloadTranslations
+            , showDeletePlantModal
+            , requestDeleteCurrentPlant
+            , confirmDeletePlant
+            , cancelDeletePlant
         };
     }
 }).mount('#app');
+
+// Expose root instance for console access (e.g., __hp_app.reloadTranslations())
+try { window.__hp_app = Vue.__app__ || null; } catch { }

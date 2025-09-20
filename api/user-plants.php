@@ -13,12 +13,19 @@ try {
         user_id INTEGER NOT NULL,
         species_id INTEGER NOT NULL,
         label TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TEXT
     )");
+    // Attempt to add deleted_at if missing (soft delete support)
+    try {
+        $cols = $db->query("PRAGMA table_info(user_plants)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasDeleted = false; foreach ($cols as $c) { if (strcasecmp($c['name'], 'deleted_at') === 0) { $hasDeleted = true; break; } }
+        if (!$hasDeleted) { $db->exec("ALTER TABLE user_plants ADD COLUMN deleted_at TEXT"); }
+    } catch (Throwable $e) { /* ignore */ }
 
     if ($method === 'GET') {
         // fetch user plants from main DB
-        $stmt = $db->prepare('SELECT id, label, species_id FROM user_plants WHERE user_id = :uid ORDER BY label');
+    $stmt = $db->prepare('SELECT id, label, species_id FROM user_plants WHERE user_id = :uid AND deleted_at IS NULL ORDER BY label');
         $stmt->bindValue(':uid', $_SESSION['user_id'], PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -50,8 +57,9 @@ try {
         parse_str($_SERVER['QUERY_STRING'] ?? '', $q);
         $id = isset($q['id']) ? (int)$q['id'] : 0;
         if ($id <= 0) { echo json_encode(['status'=>'error','message'=>'Missing id']); exit; }
-        $stmt = $db->prepare('DELETE FROM user_plants WHERE id = :id AND user_id = :uid');
-        $stmt->execute([':id'=>$id, ':uid'=>$_SESSION['user_id']]);
+    // Soft delete: mark deleted_at timestamp
+    $stmt = $db->prepare('UPDATE user_plants SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id AND user_id = :uid AND deleted_at IS NULL');
+    $stmt->execute([':id'=>$id, ':uid'=>$_SESSION['user_id']]);
         echo json_encode(['status'=>'success']);
         exit;
     }
